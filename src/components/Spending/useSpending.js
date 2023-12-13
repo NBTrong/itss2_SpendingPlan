@@ -48,7 +48,8 @@ export default function useIncome() {
         date: formatDate(item.time),
         price: item.amount,
         category: item.category.name,
-        categoryId: item.category.id
+        categoryId: item.category.id,
+        categoryMetadata: item.category,
       }
     })
   }
