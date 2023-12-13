@@ -3,85 +3,139 @@ import { BiSolidMessageRounded } from "react-icons/bi";
 import { FaRegCalendarDays } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
 import { GoDotFill } from "react-icons/go";
+import { GrRun } from "react-icons/gr";
 import Layout from '../Layout'
-import { MdLocalHospital } from "react-icons/md";
 import React, { useState } from 'react'
 import { TiDelete } from "react-icons/ti";
+import useIncome from "./useSpending";
 
-function Spending({ setTab }) {
-    const listOutcome = [
-        {
-          name: "Mua sắm",
-          date: "2023-07-20",
-          price: 10000000,
-          category: "Chi phí sinh hoạt",
-        },
-        {
-          name: "Đi ăn",
-          date: "2023-07-21",
-          price: 5000000,
-          category: "Chi phí giải trí",
-        },
-        {
-          name: "Du lịch",
-          date: "2023-07-22",
-          price: 2000000,
-          category: "Chi phí tiết kiệm",
-        },
-        {
-          name: "Tiền điện",
-          date: "2023-07-23",
-          price: 1000000,
-          category: "Chi phí cố định",
-        },
-        {
-          name: "Tiền nước",
-          date: "2023-07-24",
-          price: 500000,
-          category: "Chi phí bất ngờ",
-        },
-      ];
-      const [filters, setFilters] = useState(listOutcome)
-      const [name, setName] = useState('')
-      const [date, setDate] = useState('')
-      const [category, setCategory] = useState('')
-  
-      const handleFilter = () => {
-          let newArray = listOutcome.filter(item => item.name.toLowerCase().includes(name.toLowerCase()));
-          newArray = newArray.filter(item => item.category.toLowerCase().includes(category.toLowerCase()))
-          newArray = newArray.filter(item => item.date.toLowerCase().includes(date.toLowerCase()))
-          return newArray
-      }
+function Income({ setTab }) {
+    const initFormValue = {
+        note: '',
+        price: '',
+        date: '',
+        category: '',
+        id: null,
+    }
+
+    const { listIncomes, categories, addIncomeMutation, updateIncomeMutation, deleteIncomeMutation, totalPrice } = useIncome();
+
+    const [name, setName] = useState('')
+    const [date, setDate] = useState('')
+    const [category, setCategory] = useState('')
+    const [formData, setFormData] = useState(initFormValue);
+
+    const handleOnChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value,
+        });
+    };
+
+    const handleFilter = () => {
+        return listIncomes.filter(item => {
+            // Check if the name criteria does not exist or is included in the income item's name
+            const nameFilter = !name || item.name.toLowerCase().includes(name.toLowerCase());
+
+            // Check if the date criteria does not exist or matches the date of the income item
+            const dateFilter = !date || item.date === date;
+
+            // Check if the category criteria does not exist or matches the category of the income item
+            const categoryFilter = !category || item.category.toLowerCase() === category.toLowerCase();
+
+            // Return true if all criteria are met
+            return nameFilter && dateFilter && categoryFilter;
+        });
+    }
+
+    const handleSubmit = () => {
+        if (!formData.id)
+            addIncomeMutation.mutate(formData);
+        else {
+            updateIncomeMutation.mutate(formData);
+        }
+
+        setFormData(initFormValue);
+    }
+
+    const handleSelect = (income) => {
+        setFormData({
+            note: income.name,
+            price: income.price,
+            date: income.date,
+            category: income.categoryId,
+            id: income.id,
+        });
+    }
+
+    const handleDelete = (income) => {
+        deleteIncomeMutation.mutate({
+            id: income.id,
+        })
+    }
+
     return (
         <Layout tab={'spending'} setTab={setTab}>
             <div className='w-full  p-10 max-w-[1000px]'>
                 <div className='text-left text-3xl font-bold'>
-                    Tổng chi tiêu | <span className="text-red-500">- 450.000 VND</span>
+                    Tổng chi tiêu | <span className="text-red-500">- {totalPrice} VND</span>
                 </div>
                 <div className='grid grid-cols-3 py-10 gap-10'>
                     <div className='col-span-1 mb-3'>
                         <div className='flex flex-col items-start pb-4'>
                             <div>Ghi chú</div>
-                            <input placeholder='Chưa nhập vào' className='p-2 border-[1px] min-w-full outline-none rounded-lg border-black bg-slate-100' />
+                            <input
+                                name='note'
+                                value={formData.note}
+                                onChange={handleOnChange}
+                                placeholder='Chưa nhập vào'
+                                className='p-2 border-[1px] min-w-full outline-none rounded-lg border-black bg-slate-100'
+                            />
                         </div>
                         <div className='flex flex-col items-start pb-4'>
                             <div>Tiền thu</div>
-                            <input placeholder='0 VND' className='p-2 border-[1px] min-w-full outline-none rounded-lg border-black bg-slate-100' />
+                            <input
+                                name='price'
+                                type="number"
+                                value={formData.price}
+                                onChange={handleOnChange}
+                                placeholder='0 VND'
+                                className='p-2 border-[1px] min-w-full outline-none rounded-lg border-black bg-slate-100'
+                            />
                         </div>
                         <div className='flex flex-col items-start pb-4'>
                             <div>Ngày</div>
-                            <input placeholder='22/11/2023' className='p-2 border-[1px] min-w-full outline-none rounded-lg border-black bg-slate-100' />
+                            <input
+                                name='date'
+                                type="date"
+                                value={formData.date}
+                                onChange={handleOnChange}
+                                className='p-2 border-[1px] min-w-full outline-none rounded-lg border-black bg-slate-100'
+                            />
                         </div>
                         <div className='flex flex-col items-end pb-4'>
                             <div>Danh mục</div>
-                            <select className='p-2 border-[1px] outline-none rounded-lg border-black bg-slate-100'>
-                                <option selected>Quần áo</option>
+                            <select
+                                name='category'
+                                value={formData.category}
+                                onChange={handleOnChange}
+                                className='p-2 border-[1px] outline-none rounded-lg border-black bg-slate-100'
+                            >
+                                {categories?.map((item, index) => {
+                                    return (
+                                        <option key={index} value={item.id}>{item.name}</option>
+                                    )
+                                })}
                             </select>
                         </div>
                         <span className='text-red-500 block w-full text-right'>
                             Nhập toàn bộ các mục
                         </span>
-                        <button className='flex items-center text-white bg-black rounded-lg mt-5 justify-center  min-w-full py-2 text-2xl text-center'>
+                        <button
+                            className='flex items-center text-white bg-black rounded-lg mt-5 justify-center  min-w-full py-2 text-2xl text-center'
+                            onClick={handleSubmit}
+                        >
                             <AiFillPlusSquare />
                             <span>Thêm</span>
                             <span>/</span>
@@ -92,19 +146,20 @@ function Spending({ setTab }) {
 
                     <div className="col-span-2 py-10">
                         <div className="flex items-center justify-between gap-4 mb-4">
-                            <input type="text" placeholder="search by name" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setName(e.target.value)}/>
+                            <input type="text" placeholder="search by name" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setName(e.target.value)} />
                             <input type="date" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setDate(e.target.value)} />
                             <input type="text" placeholder="search by category" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setCategory(e.target.value)} />
                         </div>
+
                         {handleFilter().map((filter, index) => {
-                            return(
+                            return (
                                 <div key={index} className="w-full p-3 mt-5 bg-slate-100 flex items-center border-[1px] border-gray-200 justify-start rounded-lg">
                                     <div className="text-3xl px-3">
-                                        <MdLocalHospital />
+                                        <GrRun />
                                     </div>
                                     <div className="flex-1 flex flex-col items-start">
                                         <div className="flex items-center">
-                                            <div className="text-red-400"><GoDotFill /></div>
+                                            <div className="text-green-400"><GoDotFill /></div>
                                             <div>{filter.name}</div>
                                         </div>
                                         <div className="flex items-center">
@@ -116,10 +171,10 @@ function Spending({ setTab }) {
                                         </div>
                                     </div>
                                     <div className="text-3xl flex items-center">
-                                        <span className="text-yellow-400 px-2">
+                                        <span className="text-yellow-400 px-2 hover:cursor-pointer" onClick={() => handleSelect(filter)}>
                                             <FaRegEdit />
                                         </span>
-                                        <span className="text-red-500 px-2">
+                                        <span className="text-red-500 px-2 hover:cursor-pointer" onClick={() => handleDelete(filter)}>
                                             <TiDelete />
                                         </span>
                                     </div>
@@ -134,4 +189,4 @@ function Spending({ setTab }) {
     )
 }
 
-export default Spending
+export default Income
