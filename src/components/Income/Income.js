@@ -100,7 +100,7 @@ function Income({ setTab }) {
                 <div className='grid grid-cols-3 py-10 gap-10'>
                     <div className='col-span-1 mb-3'>
                         <div className='flex flex-col items-start pb-4'>
-                            <div>Ghi chú</div>
+                            <div className="mb-1">Ghi chú</div>
                             <input
                                 name='note'
                                 value={formData.note}
@@ -110,7 +110,7 @@ function Income({ setTab }) {
                             />
                         </div>
                         <div className='flex flex-col items-start pb-4'>
-                            <div>Tiền thu</div>
+                            <div className="mb-1">Tiền thu</div>
                             <input
                                 name='price'
                                 type="number"
@@ -121,7 +121,7 @@ function Income({ setTab }) {
                             />
                         </div>
                         <div className='flex flex-col items-start pb-4'>
-                            <div>Ngày</div>
+                            <div className="mb-1">Ngày</div>
                             <input
                                 name='date'
                                 type="date"
@@ -131,7 +131,7 @@ function Income({ setTab }) {
                             />
                         </div>
                         <div className='flex flex-col items-start pb-4'>
-                            <div>Danh mục</div>
+                            <div className="mb-1">Danh mục</div>
                             <select
                                 name='category'
                                 value={formData.category}
