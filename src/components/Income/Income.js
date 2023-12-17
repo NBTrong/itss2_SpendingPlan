@@ -98,9 +98,9 @@ function Income({ setTab }) {
                     Tổng thu nhập | <span className="text-green-500">+ {totalPrice.toLocaleString('vi-VN')} VND</span>
                 </div>
                 <div className='grid grid-cols-3 py-10 gap-10'>
-                    <div className='col-span-1 mb-3'>
+                    <div className='col-span-1 mb3'>
                         <div className='flex flex-col items-start pb-4'>
-                            <div>Ghi chú</div>
+                            <div classname="mb-2">Ghi chú</div>
                             <input
                                 name='note'
                                 value={formData.note}
