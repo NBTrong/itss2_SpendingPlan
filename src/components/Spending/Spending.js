@@ -3,7 +3,7 @@ import { BiSolidMessageRounded } from "react-icons/bi";
 import { FaRegCalendarDays } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
 import { GoDotFill } from "react-icons/go";
-import { GrRun } from "react-icons/gr";
+// import { GrRun } from "react-icons/gr";
 import Layout from '../Layout'
 import React, { useState } from 'react'
 import { TiDelete } from "react-icons/ti";
@@ -40,7 +40,10 @@ function Income({ setTab }) {
             const nameFilter = !name || item.name.toLowerCase().includes(name.toLowerCase());
 
             // Check if the date criteria does not exist or matches the date of the income item
-            const dateFilter = !date || item.date === date;
+            const dateFilter = !date || (
+                new Date(item.date).getMonth() === new Date(date).getMonth() &&
+                new Date(item.date).getFullYear() === new Date(date).getFullYear()
+            );
 
             // Check if the category criteria does not exist or matches the category of the income item
             const categoryFilter = !category || item.categoryId === category;
@@ -164,7 +167,7 @@ function Income({ setTab }) {
                     <div className="col-span-2 py-10">
                         <div className="flex items-center justify-between gap-4 mb-4">
                             <input type="text" placeholder="search by name" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setName(e.target.value)} />
-                            <input type="date" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setDate(e.target.value)} />
+                            <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setDate(e.target.value)} />
                             <select
                                 name='category'
                                 value={category}

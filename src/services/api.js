@@ -62,3 +62,10 @@ export const getCategories = (data) =>
     url: '/category',
     data,
   })
+
+export const addPlan = (data) =>
+  publicApi({
+    method: 'POST',
+    url: '/category/update',
+    data,
+  });

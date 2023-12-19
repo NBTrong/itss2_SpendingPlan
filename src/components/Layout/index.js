@@ -38,7 +38,9 @@ function index({ tab, setTab, children }) {
                         </div>
                     </div>
                     <div className='h-[1px] border-b-white border-b-[1px] p-2 '></div>
-                    <div className='flex items-center justify-start p-3 cursor-pointer mt-4'>
+                    <div onClick={() => {
+                        setTab('dashboard')
+                    }} className={`flex items-center justify-start p-3 cursor-pointer ${tab === 'dashboard' ? 'bg-cyan-600' : ''}`} >
                         <div className='w-[30px] text-left text-xl'>
                             <TbTable />
                         </div>
@@ -46,7 +48,9 @@ function index({ tab, setTab, children }) {
                             Tổng quan
                         </div>
                     </div>
-                    <div className='flex items-center justify-start p-3 cursor-pointer'>
+                    <div onClick={() => {
+                        setTab('plan')
+                    }} className={`flex items-center justify-start p-3 cursor-pointer ${tab === 'plan' ? 'bg-cyan-600' : ''}`} >
                         <div className='w-[30px] text-left text-xl'>
                             <BsStars />
                         </div>
