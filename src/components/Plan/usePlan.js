@@ -11,7 +11,6 @@ import {
   getCategories,
   deleteExpense
 } from '../../services/api';
-import { formatDate } from '../../utils/helpers';
 
 export default function usePlan() {
   const queryClient = useQueryClient()
@@ -39,31 +38,10 @@ export default function usePlan() {
         color: item?.category?.color,
         icon: item?.category?.icon,
         status: item?.category?.status,
+        amount: item?.category?.amount
       },
     })) : []
   }, []);
-
-  const listExpensesPresentation = (data) => {
-    return data.map(item => {
-      return {
-        id: item.id,
-        name: item.note,
-        date: formatDate(item.time),
-        price: item.amount,
-        category: item.category.name,
-        categoryId: item.category.id,
-        categoryMetadata: item.category,
-      }
-    })
-  }
-
-  const calculateTotalPrice = (data) => {
-    let totalPrice = 0;
-    data?.forEach(item => {
-      totalPrice += item.price;
-    });
-    return totalPrice;
-  }
 
   const { data, isSuccess } = useQuery({
     queryKey: ['spending', currentMonth],
@@ -72,9 +50,8 @@ export default function usePlan() {
       time: currentTime
     }),
     enabled: !!userKey,
-    select: (data) => listExpensesPresentation(
-      listExpensesTransform(data.data.data)
-    ),
+    select: (data) =>
+      listExpensesTransform(data.data.data),
     retry: 3,
   });
 
@@ -82,26 +59,39 @@ export default function usePlan() {
   const categoryQuery = useQuery({
     queryKey: ['category-spending'],
     queryFn: () => getCategories({
-      status: 'expenses'
+      status: 'expenses',
     }),
     enabled: !!userKey && !!isSuccess,
     select: (data) => listCategoryTransform(data.data.data),
     retry: 3,
   });
 
-  const listCategoryTransform = useCallback((data) => {
-    return data ? data.map(item => {
+  const listCategoryTransform = useCallback((categories) => {
+    const result = categories ? categories.map(category => {
       return {
-        id: item.id,
-        name: item.name,
-        color: item.color,
-        icon: item.icon,
-        status: item.status,
-        createdAt: item.created_at,
-        updatedAt: item.updated_at,
+        id: category.id,
+        name: category.name,
+        color: category.color,
+        icon: category.icon,
+        status: category.status,
+        amount: category.amount,
+        current: 0,
+        createdAt: category.created_at,
+        updatedAt: category.updated_at,
       };
-    }) : []
-  }, []);
+    }) : [];
+
+    data.forEach(item => {
+      const categoryIndex = result.findIndex(category => {
+        return item.category.id === category.id
+      })
+      if (categoryIndex !== -1) {
+        result[categoryIndex].current += item.amount
+      }
+    })
+
+    return result
+  }, [data]);
 
   // ---------------------------------------------- Add plan ------------------------------------
   const addPlanMutation = useMutation({
@@ -109,7 +99,7 @@ export default function usePlan() {
       return addPlan(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['spending'] })
+      queryClient.invalidateQueries({ queryKey: ['category-spending'] })
     },
     onError: (error) => {
       console.log(error);
@@ -131,11 +121,9 @@ export default function usePlan() {
       console.log(error);
     },
   });
-
   return {
-    categories: categoryQuery?.data,
+    categories: categoryQuery?.data || [],
     addPlanMutation,
     deletePlanMutation,
-    totalPrice: calculateTotalPrice(data)
   };
 }
