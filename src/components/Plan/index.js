@@ -151,31 +151,34 @@ function Plan({ setTab }) {
 
 
           <div className="col-span-2 ml-5">
-            {categories.length > 0 && categories.filter(item => item.amount > 0).map(category => (
-              <div className="w-full p-3  justify-start">
-                <div className="text-xl px-3 flex justify-between mb-3">
-                  <div className="text-left">{category.name}</div>
-                  <div>{category.amount.toLocaleString('vi-VN')} VND</div>
-                </div>
-                <div className="flex-1 flex flex-col justify-start">
-                  <div className="bg-gray-300 w-full rounded-3xl flex" style={{ height: 20 }}>
-                    <div className={`${handleProgress(category).bg} text-white text-center text-sm rounded-3xl`}
-                      style={{ width: `${handleProgress(category).percent > 1 ? handleProgress(category).percent : 10}%`, height: 20 }}
-                    >
-                      {category.current.toLocaleString('vi-VN')} VND
+            {categories.length > 0 && categories.filter(item => item.amount > 0).map(category => {
+              const remaining = category.amount - category.current
+              return (
+                <div className="w-full p-3  justify-start">
+                  <div className="text-xl px-3 flex justify-between mb-3">
+                    <div className="text-left">{category.name}</div>
+                    <div>{category.amount.toLocaleString('vi-VN')} VND</div>
+                  </div>
+                  <div className="flex-1 flex flex-col justify-start">
+                    <div className="bg-gray-300 w-full rounded-3xl flex" style={{ height: 20 }}>
+                      <div className={`${handleProgress(category).bg} text-white text-center text-sm rounded-3xl`}
+                        style={{ width: `${handleProgress(category).percent > 1 ? handleProgress(category).percent : 10}%`, height: 20 }}
+                      >
+                        {category.current.toLocaleString('vi-VN')} VND
+                      </div>
+                    </div>
+                  </div>
+                  <div className='flex items-center justify-between mt-1 text-center'>
+                    <div className="text-left text-slate-600 italic">{remaining >= 0 ? 'Còn' : 'Vượt'} {Math.abs(remaining).toLocaleString('vi-VN')}VND</div>
+                    <div>
+                      <span onClick={() => handleSelect(category)} className="text-orange-400 hover:cursor-pointer">Sửa</span>
+                      <span className="mx-2">|</span>
+                      <span onClick={() => handleDelete(category)} className="text-red-400 hover:cursor-pointer">Xóa</span>
                     </div>
                   </div>
                 </div>
-                <div className='flex items-center justify-between mt-1 text-center'>
-                  <div className="text-left text-slate-600 italic">còn {(category.amount - category.current).toLocaleString('vi-VN')}VND</div>
-                  <div>
-                    <span onClick={() => handleSelect(category)} className="text-orange-400 hover:cursor-pointer">Sửa</span>
-                    <span className="mx-2">|</span>
-                    <span onClick={() => handleDelete(category)} className="text-red-400 hover:cursor-pointer">Xóa</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+              )
+            })}
             <div className="w-full p-3 mt-5 border-[1px] border-gray-200 rounded-3xl text-2xl">
               <span>Gợi ý số tiền nên tiêu mỗi ngày để đạt mục tiêu cuối tháng: </span>
               <span className="text-lime-500">{remainingAmount.toLocaleString('vi-VN')}VND</span>
