@@ -104,22 +104,22 @@ function Income({ setTab }) {
 
     const handleDelete = (income) => {
         swal({
-            title: "Are you sure?",
-            text: "Are you sure to delete this item?",
+            title: "Bạn có chắc chắn?",
+            text: "Bạn có chắc chắn muốn xoá thông tin này không?",
             icon: "warning",
             dangerMode: true,
             buttons: {
-              cancel: "Cancel",
-              confirm: "Delete",
+              cancel: "Huỷ bỏ",
+              confirm: "Xoá",
             },
           }).then((willDelete) => {
             if (willDelete) {
                 deleteIncomeMutation.mutate({
                     id: income.id,
                 })              
-              swal("Deleted!", "Delete Successfully!", "success");
+              swal("Đã xoá", "Xoá thông tin thành công.", "Thành công");
             } else {
-              swal("Cancelled", "Your item is safe :)", "info");
+              swal("Đã huỷ bỏ", "Thông tin của bạn chưa bị xoá.", "Thông tin");
             }
           });
     }

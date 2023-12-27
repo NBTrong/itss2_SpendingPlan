@@ -23,7 +23,7 @@ function Index({ setTab }) {
   console.log(listIncomes, listSpending);
   useEffect(() => {
     (async function () {
-      // setNewArr([...newArr,  listIncomes])
+      setNewArr([...listIncomes, ...listSpending])
       // Tạo một mảng với 12 tháng ban đầu
       let months = Array.from({ length: 12 }, (_, index) => ({
         month: index + 1,
@@ -133,7 +133,7 @@ function Index({ setTab }) {
                 <div size={50}><IoIosOpen /></div>
               </div>
               <div className='h-[30vh] overflow-y-auto'>
-                {listSpending?.map(item => {
+                {/* {listSpending?.map(item => {
                   return (
                     <div className="flex justify-between justify-between items-center">
                       <div className="text-left">
@@ -155,7 +155,36 @@ function Index({ setTab }) {
                       <div className="text-xl text-green-700 font-semibold">{item.price}</div>
                     </div>
                   )
+                })} */}
+
+                {newArr?.sort((a, b) => {
+                  const dateA = new Date(a.date);
+                  const dateB = new Date(b.date);
+                  return dateB - dateA;
+                }).map(item => {
+                  if(item.categoryMetadata.status == "incomes") {
+                    return (
+                      <div className="flex justify-between justify-between items-center">
+                        <div className="text-left">
+                          <div className="text-xl font-semibold text-left">{item.name}</div>
+                          <div className="text-gray-400">{item.date}</div>
+                        </div>
+                        <div className="text-xl text-green-700 font-semibold">{item.price}</div>
+                      </div>
+                    )
+                  }else {
+                    return (
+                      <div className="flex justify-between justify-between items-center">
+                        <div className="text-left">
+                          <div className="text-xl font-semibold text-left">{item.name}</div>
+                          <div className="text-gray-400">{item.date}</div>
+                        </div>
+                        <div className="text-xl text-red-700 font-semibold">{item.price}</div>
+                      </div>
+                    )
+                  }
                 })}
+                
 
               </div>
               {/* <div className="flex justify-between justify-between items-center">
