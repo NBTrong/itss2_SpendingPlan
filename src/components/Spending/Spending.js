@@ -3,11 +3,12 @@ import { BiSolidMessageRounded } from "react-icons/bi";
 import { FaRegCalendarDays } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
 import { GoDotFill } from "react-icons/go";
-import { GrRun } from "react-icons/gr";
+// import { GrRun } from "react-icons/gr";
 import Layout from '../Layout'
 import React, { useState } from 'react'
 import { TiDelete } from "react-icons/ti";
 import useIncome from "./useSpending";
+import swal from "sweetalert";
 
 function Income({ setTab }) {
     const initFormValue = {
@@ -21,7 +22,8 @@ function Income({ setTab }) {
     const { listIncomes, categories, addIncomeMutation, updateIncomeMutation, deleteIncomeMutation, totalPrice } = useIncome();
 
     const [name, setName] = useState('')
-    const [date, setDate] = useState('')
+    const [fromDate, setFromDate] = useState('')
+    const [toDate, setToDate] = useState('')
     const [category, setCategory] = useState('')
     const [formData, setFormData] = useState(initFormValue);
     const [error, setError] = useState(false);
@@ -40,7 +42,9 @@ function Income({ setTab }) {
             const nameFilter = !name || item.name.toLowerCase().includes(name.toLowerCase());
 
             // Check if the date criteria does not exist or matches the date of the income item
-            const dateFilter = !date || item.date === date;
+            const dateFilter = !fromDate || !toDate || (
+                new Date(item.date) <= new Date(toDate) && new Date(item.date) >= new Date(fromDate) 
+            );
 
             // Check if the category criteria does not exist or matches the category of the income item
             const categoryFilter = !category || item.categoryId === category;
@@ -86,9 +90,26 @@ function Income({ setTab }) {
     }
 
     const handleDelete = (income) => {
-        deleteIncomeMutation.mutate({
-            id: income.id,
-        })
+        
+        swal({
+            title: "Are you sure?",
+            text: "Are you sure to delete this item?",
+            icon: "warning",
+            dangerMode: true,
+            buttons: {
+              cancel: "Cancel",
+              confirm: "Delete",
+            },
+          }).then((willDelete) => {
+            if (willDelete) {
+                deleteIncomeMutation.mutate({
+                    id: income.id,
+                })              
+              swal("Deleted!", "Delete Successfully!", "success");
+            } else {
+              swal("Cancelled", "Your item is safe :)", "info");
+            }
+          });
     }
 
     return (
@@ -100,7 +121,7 @@ function Income({ setTab }) {
                 <div className='grid grid-cols-3 py-10 gap-10'>
                     <div className='col-span-1 mb-3'>
                         <div className='flex flex-col items-start pb-4'>
-                            <div>Ghi chú</div>
+                            <div className="mb-1">Ghi chú</div>
                             <input
                                 name='note'
                                 value={formData.note}
@@ -110,7 +131,7 @@ function Income({ setTab }) {
                             />
                         </div>
                         <div className='flex flex-col items-start pb-4'>
-                            <div>Tiền thu</div>
+                            <div className="mb-1">Tiền thu</div>
                             <input
                                 name='price'
                                 type="number"
@@ -121,7 +142,7 @@ function Income({ setTab }) {
                             />
                         </div>
                         <div className='flex flex-col items-start pb-4'>
-                            <div>Ngày</div>
+                            <div className="mb-1">Ngày</div>
                             <input
                                 name='date'
                                 type="date"
@@ -131,7 +152,7 @@ function Income({ setTab }) {
                             />
                         </div>
                         <div className='flex flex-col items-start pb-4'>
-                            <div>Danh mục</div>
+                            <div className="mb-1">Danh mục</div>
                             <select
                                 name='category'
                                 value={formData.category}
@@ -164,7 +185,8 @@ function Income({ setTab }) {
                     <div className="col-span-2 py-10">
                         <div className="flex items-center justify-between gap-4 mb-4">
                             <input type="text" placeholder="search by name" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setName(e.target.value)} />
-                            <input type="date" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setDate(e.target.value)} />
+                            <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setFormData(e.target.value)} />
+                            <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setToDate(e.target.value)} />
                             <select
                                 name='category'
                                 value={category}
