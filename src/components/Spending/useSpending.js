@@ -14,7 +14,7 @@ import {
 } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 
-export default function useIncome() {
+export default function useSpending() {
   const queryClient = useQueryClient()
 
   const [userKey] = useRecoilState(userKeyAtom);
