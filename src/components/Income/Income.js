@@ -3,11 +3,12 @@ import { BiSolidMessageRounded } from "react-icons/bi";
 import { FaRegCalendarDays } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
 import { GoDotFill } from "react-icons/go";
-import { GrRun } from "react-icons/gr";
+//import { GrRun } from "react-icons/gr";
 import Layout from '../Layout'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { TiDelete } from "react-icons/ti";
 import useIncome from "./useIncome";
+import swal from "sweetalert";
 
 function Income({ setTab }) {
     const initFormValue = {
@@ -21,11 +22,15 @@ function Income({ setTab }) {
     const { listIncomes, categories, addIncomeMutation, updateIncomeMutation, deleteIncomeMutation, totalPrice } = useIncome();
 
     const [name, setName] = useState('')
-    const [date, setDate] = useState('')
+    const [fromDate, setFromDate] = useState('')
+    const [toDate, setToDate] = useState('')
     const [category, setCategory] = useState('')
     const [formData, setFormData] = useState(initFormValue);
     const [error, setError] = useState(false);
-
+    const [arr, setArr] = useState(listIncomes)
+    useEffect(() => {
+        setArr(listIncomes)
+    }, [listIncomes])
     const handleOnChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -34,15 +39,35 @@ function Income({ setTab }) {
         });
     };
 
+    const isWithinMonthYear = (dateToCheck, fromDate, toDate) => {
+        const date = new Date(dateToCheck);
+        const fromDateObj = new Date(fromDate);
+        const toDateObj = new Date(toDate);
+        const year = date.getFullYear();
+        const month = date.getMonth();
+      
+        return (
+          date >= new Date(year, month, fromDateObj.getDate()) &&
+          date <= new Date(year, month, toDateObj.getDate())
+        );
+    }
+
     const handleFilter = () => {
-        return listIncomes.filter(item => {
+        return arr.filter(item => {
             // Check if the name criteria does not exist or is included in the income item's name
             const nameFilter = !name || item.name.toLowerCase().includes(name.toLowerCase());
 
             // Check if the date criteria does not exist or matches the date of the income item
+<<<<<<< HEAD
             const dateFilter = !date || (
                 new Date(item.date).getMonth() === new Date(date).getMonth() &&
                 new Date(item.date).getFullYear() === new Date(date).getFullYear()
+=======
+            const dateFilter = !fromDate || !toDate || (
+                // new Date(item.date).getMonth() === new Date(date).getMonth() &&
+                // new Date(item.date).getFullYear() === new Date(date).getFullYear()
+                new Date(item.date) <= new Date(toDate) && new Date(item.date) >= new Date(fromDate) 
+>>>>>>> main
             );
 
             // Check if the category criteria does not exist or matches the category of the income item
@@ -89,9 +114,25 @@ function Income({ setTab }) {
     }
 
     const handleDelete = (income) => {
-        deleteIncomeMutation.mutate({
-            id: income.id,
-        })
+        swal({
+            title: "Bạn có chắc chắn?",
+            text: "Bạn có chắc chắn muốn xoá thông tin này không?",
+            icon: "warning",
+            dangerMode: true,
+            buttons: {
+              cancel: "Huỷ bỏ",
+              confirm: "Xoá",
+            },
+          }).then((willDelete) => {
+            if (willDelete) {
+                deleteIncomeMutation.mutate({
+                    id: income.id,
+                })              
+              swal("Đã xoá", "Xoá thông tin thành công.", "Thành công");
+            } else {
+              swal("Đã huỷ bỏ", "Thông tin của bạn chưa bị xoá.", "Thông tin");
+            }
+          });
     }
 
     return (
@@ -167,7 +208,12 @@ function Income({ setTab }) {
                     <div className="col-span-2 py-10">
                         <div className="flex items-center justify-between gap-4 mb-4">
                             <input type="text" placeholder="search by name" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setName(e.target.value)} />
+<<<<<<< HEAD
                             <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setDate(e.target.value)} />
+=======
+                            <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setFromDate(e.target.value)} />
+                            <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setToDate(e.target.value)} />
+>>>>>>> main
                             {/* <input type="text" placeholder="search by category" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setCategory(e.target.value)} /> */}
                             <select
                                 name='category'
@@ -183,43 +229,45 @@ function Income({ setTab }) {
                                 })}
                             </select>
                         </div>
+                        <div className="h-[55vh] overflow-y-auto">
+                            {handleFilter().map((filter, index) => {
+                                return (
+                                    <div key={index} className="w-full p-3 mt-5 bg-slate-100 flex items-center border-[1px] border-gray-200 justify-start rounded-lg">
+                                        <div className="text-3xl px-3">
+                                            {/* <GrRun /> */}
+                                            <img
+                                                src={filter.categoryMetadata.icon}
+                                                alt="Mô tả hình ảnh"
+                                                width="30"
+                                                height="30"
+                                            />
+                                        </div>
+                                        <div className="flex-1 flex flex-col items-start">
+                                            <div className="flex items-center">
+                                                <div className="text-green-400"><GoDotFill /></div>
+                                                <div>{filter.name}</div>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <span className="pr-3"> VND {filter.price.toLocaleString('vi-VN')}</span>
+                                                <FaRegCalendarDays />
+                                                <span className="pl-1 pr-3"> {filter.date}</span>
+                                                <BiSolidMessageRounded />
+                                                <span className="pl-1 pr-3">{filter.category}</span>
+                                            </div>
+                                        </div>
+                                        <div className="text-3xl flex items-center">
+                                            <span className="text-yellow-400 px-2 hover:cursor-pointer" onClick={() => handleSelect(filter)}>
+                                                <FaRegEdit />
+                                            </span>
+                                            <span className="text-red-500 px-2 hover:cursor-pointer" onClick={() => handleDelete(filter)}>
+                                                <TiDelete />
+                                            </span>
+                                        </div>
+                                    </div>
+                                )
+                            })}
 
-                        {handleFilter().map((filter, index) => {
-                            return (
-                                <div key={index} className="w-full p-3 mt-5 bg-slate-100 flex items-center border-[1px] border-gray-200 justify-start rounded-lg">
-                                    <div className="text-3xl px-3">
-                                        {/* <GrRun /> */}
-                                        <img
-                                            src={filter.categoryMetadata.icon}
-                                            alt="Mô tả hình ảnh"
-                                            width="30"
-                                            height="30"
-                                        />
-                                    </div>
-                                    <div className="flex-1 flex flex-col items-start">
-                                        <div className="flex items-center">
-                                            <div className="text-green-400"><GoDotFill /></div>
-                                            <div>{filter.name}</div>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <span className="pr-3"> VND {filter.price.toLocaleString('vi-VN')}</span>
-                                            <FaRegCalendarDays />
-                                            <span className="pl-1 pr-3"> {filter.date}</span>
-                                            <BiSolidMessageRounded />
-                                            <span className="pl-1 pr-3">{filter.category}</span>
-                                        </div>
-                                    </div>
-                                    <div className="text-3xl flex items-center">
-                                        <span className="text-yellow-400 px-2 hover:cursor-pointer" onClick={() => handleSelect(filter)}>
-                                            <FaRegEdit />
-                                        </span>
-                                        <span className="text-red-500 px-2 hover:cursor-pointer" onClick={() => handleDelete(filter)}>
-                                            <TiDelete />
-                                        </span>
-                                    </div>
-                                </div>
-                            )
-                        })}
+                        </div>
                     </div>
 
                 </div>
