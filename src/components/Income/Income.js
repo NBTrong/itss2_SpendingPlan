@@ -3,9 +3,9 @@ import { BiSolidMessageRounded } from "react-icons/bi";
 import { FaRegCalendarDays } from "react-icons/fa6";
 import { FaRegEdit } from "react-icons/fa";
 import { GoDotFill } from "react-icons/go";
-import { GrRun } from "react-icons/gr";
+//import { GrRun } from "react-icons/gr";
 import Layout from '../Layout'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { TiDelete } from "react-icons/ti";
 import useIncome from "./useIncome";
 import swal from "sweetalert";
@@ -27,7 +27,10 @@ function Income({ setTab }) {
     const [category, setCategory] = useState('')
     const [formData, setFormData] = useState(initFormValue);
     const [error, setError] = useState(false);
-
+    const [arr, setArr] = useState(listIncomes)
+    useEffect(() => {
+        setArr(listIncomes)
+    }, [listIncomes])
     const handleOnChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -50,22 +53,24 @@ function Income({ setTab }) {
     }
 
     const handleFilter = () => {
-        return listIncomes.filter(item => {
-          // Check if the name criteria does not exist or is included in the income item's name
-          const nameFilter = !name || item.name.toLowerCase().includes(name.toLowerCase());
-      
-          // Check if the date criteria does not exist or matches the date of the income item
-          const dateFilter = !fromDate || !toDate || (
-            isWithinMonthYear(item.date, fromDate, toDate)
-          );
-      
-          // Check if the category criteria does not exist or matches the category of the income item
-          const categoryFilter = !category || item.categoryId === category;
-      
-          // Return true if all criteria are met
-          return nameFilter && dateFilter && categoryFilter;
+        return arr.filter(item => {
+            // Check if the name criteria does not exist or is included in the income item's name
+            const nameFilter = !name || item.name.toLowerCase().includes(name.toLowerCase());
+
+            // Check if the date criteria does not exist or matches the date of the income item
+            const dateFilter = !fromDate || !toDate || (
+                // new Date(item.date).getMonth() === new Date(date).getMonth() &&
+                // new Date(item.date).getFullYear() === new Date(date).getFullYear()
+                new Date(item.date) <= new Date(toDate) && new Date(item.date) >= new Date(fromDate) 
+            );
+
+            // Check if the category criteria does not exist or matches the category of the income item
+            const categoryFilter = !category || item.categoryId === category;
+
+            // Return true if all criteria are met
+            return nameFilter && dateFilter && categoryFilter;
         });
-      }
+    }
 
     const handleSubmit = () => {
         if (!formData.id)
