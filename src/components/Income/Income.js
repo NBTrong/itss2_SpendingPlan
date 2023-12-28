@@ -22,8 +22,9 @@ function Income({ setTab }) {
     const { listIncomes, categories, addIncomeMutation, updateIncomeMutation, deleteIncomeMutation, totalPrice } = useIncome();
 
     const [name, setName] = useState('')
-    const [fromDate, setFromDate] = useState('')
-    const [toDate, setToDate] = useState('')
+    // const [fromDate, setFromDate] = useState('')
+    // const [toDate, setToDate] = useState('')
+    const [date, setDate] = useState('')
     const [category, setCategory] = useState('')
     const [formData, setFormData] = useState(initFormValue);
     const [error, setError] = useState(false);
@@ -45,10 +46,10 @@ function Income({ setTab }) {
         const toDateObj = new Date(toDate);
         const year = date.getFullYear();
         const month = date.getMonth();
-      
+
         return (
-          date >= new Date(year, month, fromDateObj.getDate()) &&
-          date <= new Date(year, month, toDateObj.getDate())
+            date >= new Date(year, month, fromDateObj.getDate()) &&
+            date <= new Date(year, month, toDateObj.getDate())
         );
     }
 
@@ -58,10 +59,9 @@ function Income({ setTab }) {
             const nameFilter = !name || item.name.toLowerCase().includes(name.toLowerCase());
 
             // Check if the date criteria does not exist or matches the date of the income item
-            const dateFilter = !fromDate || !toDate || (
-                // new Date(item.date).getMonth() === new Date(date).getMonth() &&
-                // new Date(item.date).getFullYear() === new Date(date).getFullYear()
-                new Date(item.date) <= new Date(toDate) && new Date(item.date) >= new Date(fromDate) 
+            const dateFilter = !date || (
+                new Date(item.date).getMonth() === new Date(date).getMonth() &&
+                new Date(item.date).getFullYear() === new Date(date).getFullYear()
             );
 
             // Check if the category criteria does not exist or matches the category of the income item
@@ -114,19 +114,19 @@ function Income({ setTab }) {
             icon: "warning",
             dangerMode: true,
             buttons: {
-              cancel: "Huỷ bỏ",
-              confirm: "Xoá",
+                cancel: "Huỷ bỏ",
+                confirm: "Xoá",
             },
-          }).then((willDelete) => {
+        }).then((willDelete) => {
             if (willDelete) {
                 deleteIncomeMutation.mutate({
                     id: income.id,
-                })              
-              swal("Đã xoá", "Xoá thông tin thành công.", "Thành công");
+                })
+                swal("Đã xoá", "Xoá thông tin thành công.", "Thành công");
             } else {
-              swal("Đã huỷ bỏ", "Thông tin của bạn chưa bị xoá.", "Thông tin");
+                swal("Đã huỷ bỏ", "Thông tin của bạn chưa bị xoá.", "Thông tin");
             }
-          });
+        });
     }
 
     return (
@@ -202,8 +202,7 @@ function Income({ setTab }) {
                     <div className="col-span-2 py-10">
                         <div className="flex items-center justify-between gap-4 mb-4">
                             <input type="text" placeholder="search by name" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setName(e.target.value)} />
-                            <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setFromDate(e.target.value)} />
-                            <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setToDate(e.target.value)} />
+                            <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setDate(e.target.value)} />
                             {/* <input type="text" placeholder="search by category" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setCategory(e.target.value)} /> */}
                             <select
                                 name='category'

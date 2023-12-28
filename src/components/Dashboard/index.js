@@ -1,6 +1,6 @@
 // import { AiFillPlusSquare } from "react-icons/ai";
 import Layout from '../Layout'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 import Calendar from 'react-calendar';
@@ -13,17 +13,38 @@ import useSpending from '../Spending/useSpending';
 function Index({ setTab }) {
   const chartRef = useRef(null);
   const chartDoughnutRef = useRef(null);
-  const [value, onChange] = useState(new Date());
-  const [currentMonth, setCurrentMonth] = useState(null); // Thêm state cho tháng hiện tại
+  // const [date, setDate] = useState(new Date());
   const { listIncomes } = useIncome()
   const { listIncomes: listSpending } = useSpending()
   const [newArr, setNewArr] = useState([])
   const [total, setTotal] = useState(0)
-  
-  console.log(listIncomes, listSpending);
+  const [selectedDate, setSelectedDate] = useState();
+
+  const listIncomesFiltered = useMemo(() => {
+    return listIncomes.filter(item => {
+      // Check if the date criteria does not exist or matches the date of the income item
+      const dateFilter = !selectedDate || (
+        new Date(item.date).getMonth() === new Date(selectedDate).getMonth() &&
+        new Date(item.date).getFullYear() === new Date(selectedDate).getFullYear()
+      );
+      return dateFilter;
+    });
+  }, [listIncomes, selectedDate])
+
+  const listSpendingFiltered = useMemo(() => {
+    return listSpending.filter(item => {
+      // Check if the date criteria does not exist or matches the date of the income item
+      const dateFilter = !selectedDate || (
+        new Date(item.date).getMonth() === new Date(selectedDate).getMonth() &&
+        new Date(item.date).getFullYear() === new Date(selectedDate).getFullYear()
+      );
+      return dateFilter;
+    });
+  }, [listSpending, selectedDate])
+
   useEffect(() => {
     (async function () {
-      setNewArr([...listIncomes, ...listSpending])
+      setNewArr([...listIncomesFiltered, ...listSpendingFiltered])
       // Tạo một mảng với 12 tháng ban đầu
       let months = Array.from({ length: 12 }, (_, index) => ({
         month: index + 1,
@@ -32,7 +53,7 @@ function Index({ setTab }) {
       }));
 
       // Lặp qua từng đối tượng trong mảng dữ liệu
-      for (const item of listSpending) {
+      for (const item of listSpendingFiltered) {
         // Trích xuất tháng từ ngày trong đối tượng
         const month = new Date(item.date).getMonth() + 1;
 
@@ -40,25 +61,13 @@ function Index({ setTab }) {
         months[month - 1].count += item.price;
       }
 
-      for (const item of listIncomes) {
+      for (const item of listIncomesFiltered) {
         // Trích xuất tháng từ ngày trong đối tượng
         const month = new Date(item.date).getMonth() + 1;
 
         // Cập nhật tổng giá trị cho tháng tương ứng
         months[month - 1].income += item.price;
       }
-
-      console.log(months);
-
-      const data = [
-        { year: 2010, count: 30, income: 15 },
-        { year: 2011, count: 40, income: 20 },
-        { year: 2012, count: 55, income: 25 },
-        { year: 2013, count: 65, income: 30 },
-        { year: 2014, count: 72, income: 35 },
-        { year: 2015, count: 80, income: 40 },
-        { year: 2016, count: 98, income: 45 },
-      ];
 
       if (chartRef.current) {
         chartRef.current.destroy(); // Destroy existing chart if it exists
@@ -111,7 +120,9 @@ function Index({ setTab }) {
       });
 
     })();
-  }, [listSpending, listIncomes]);
+  }, [listIncomesFiltered, listSpendingFiltered]);
+
+  // console.log(date);
 
   return (
     <Layout tab={'dashboard'} setTab={setTab}>
@@ -120,11 +131,19 @@ function Index({ setTab }) {
       </div>
       <div className='w-full px-10'>
         <div className='grid grid-cols-2 mt-5 gap-10'>
-          <div className='col-span-1 mb-3'>
+          <div className='col-span-6 mb-3'>
             <canvas id="acquisitions"></canvas>
           </div>
-          <div className="col-span-1 ml-5 mt-5">
-            <Calendar onChange={onChange} value={value} />
+          <div className="col-span-6 ml-5 mt-5">
+            {/* <Calendar
+              // onChange={handleDateChange}
+              // value={selectedDate}
+              // defaultValue={new Date()}
+              calendarType="ISO 8601"  // Đặt kiểu lịch ISO để chỉ hiển thị tháng và năm
+              showNeighboringMonth={false}  // Tắt hiển thị các tháng lân cận
+              view="year"  // Hiển thị theo kiểu năm
+            /> */}
+            <input type="month" className="border-[1px] border-gray-200 p-2 outline-none" onChange={e => setSelectedDate(e.target.value)} />
           </div>
           <div className='col-span-1 mb-3 border-[1px] rounded-lg border-black'>
             <div className='pb-4 p-5'>
@@ -162,7 +181,7 @@ function Index({ setTab }) {
                   const dateB = new Date(b.date);
                   return dateB - dateA;
                 }).map(item => {
-                  if(item.categoryMetadata.status == "incomes") {
+                  if (item.categoryMetadata.status == "incomes") {
                     return (
                       <div className="flex justify-between justify-between items-center">
                         <div className="text-left">
@@ -172,7 +191,7 @@ function Index({ setTab }) {
                         <div className="text-xl text-green-700 font-semibold">{item.price}</div>
                       </div>
                     )
-                  }else {
+                  } else {
                     return (
                       <div className="flex justify-between justify-between items-center">
                         <div className="text-left">
@@ -184,7 +203,7 @@ function Index({ setTab }) {
                     )
                   }
                 })}
-                
+
 
               </div>
               {/* <div className="flex justify-between justify-between items-center">
