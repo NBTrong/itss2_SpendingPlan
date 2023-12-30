@@ -133,7 +133,7 @@ function Index({ setTab }) {
 
     })();
   }, [listSpending, listIncomes]);
-  const fomatMoney = (amount) => {
+  const formatMoney = (amount) => {
     const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     return formattedAmount
   }
@@ -207,7 +207,7 @@ function Index({ setTab }) {
                           <div className="text-xl font-semibold text-left">{item.name}</div>
                           <div className="text-gray-400">{item.date}</div>
                         </div>
-                        <div className="text-xl text-green-700 font-semibold">{fomatMoney(item.price)}</div>
+                        <div className="text-xl text-green-700 font-semibold">{formatMoney(item.price)}</div>
                       </div>
                     )
                   }else {
@@ -217,7 +217,7 @@ function Index({ setTab }) {
                           <div className="text-xl font-semibold text-left">{item.name}</div>
                           <div className="text-gray-400">{item.date}</div>
                         </div>
-                        <div className="text-xl text-red-700 font-semibold">{fomatMoney(item.price)}</div>
+                        <div className="text-xl text-red-700 font-semibold">{formatMoney(item.price)}</div>
                       </div>
                     )
                   }
@@ -254,7 +254,7 @@ function Index({ setTab }) {
             </div>
             <div className="w-[400px] p-3 mt-3 border-[1px] px-10 border-gray-200 rounded-3xl text-left">
               <div className="text-gray-400">Tổng số tài sản hiện tại</div>
-              <div className="text-3xl font-semibold">{fomatMoney(total)}</div>
+              <div className="text-3xl font-semibold">{formatMoney(total)}</div>
             </div>
           </div>
         </div>
