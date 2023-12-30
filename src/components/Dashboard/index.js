@@ -16,6 +16,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { YearCalendar } from '@mui/x-date-pickers/YearCalendar';
 import { MonthCalendar } from '@mui/x-date-pickers/MonthCalendar';
+import { DateCalendar } from '@mui/x-date-pickers';
 
 
 function Index({ setTab }) {
@@ -84,7 +85,8 @@ function Index({ setTab }) {
           ],
         },
       });
-  
+
+        //Biểu đồ theo thu chi
          // Tính tổng giá trị của tất cả các tháng
          const totalOfAllMonthsIncome = months.reduce((sum, month) => sum + month.income, 0);
          const totalOfAllMonthsSpending = months.reduce((sum, month) => sum + month.count, 0);
@@ -98,6 +100,27 @@ function Index({ setTab }) {
              hoverOffset: 4,
            }],
          };
+
+
+    /* //Biểu đồ theo Category
+         // Chuyển đổi đối tượng categoryPriceMap thành một mảng
+      const categoryPriceArray = [...Object.values(categoryIncome),...Object.values(categorySpending)];
+
+      console.log(categoryPriceArray);
+      // Tính tổng giá trị của tất cả các tháng
+      const totalOfAllMonthsIncome = months.reduce((sum, month) => sum + month.income, 0);
+      const totalOfAllMonthsSpending = months.reduce((sum, month) => sum + month.count, 0);
+      setTotal(totalOfAllMonthsIncome - totalOfAllMonthsSpending)
+      const dataDoughnut = {
+        labels: categoryPriceArray.map(item => item.category),
+        datasets: [{
+          label: 'My First Dataset',
+          data: categoryPriceArray.map(item => item.price),
+          backgroundColor: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange', 'Pink'],
+          hoverOffset: 4,
+        }],
+      };
+    */
    
          if (chartDoughnutRef.current) {
            chartDoughnutRef.current.destroy(); // Destroy existing chart if it exists
@@ -136,7 +159,7 @@ function Index({ setTab }) {
             <LocalizationProvider dateAdapter={AdapterDayjs} >
               <DemoContainer components={['MonthCalendar']}>
                 <DemoItem>
-                  <MonthCalendar onChange={(newValue) => handleChange(newValue)} />
+                  <DateCalendar views={['month', 'year']} onChange={(newValue) => handleChange(newValue)} />
                 </DemoItem>
               </DemoContainer>
             </LocalizationProvider>
@@ -184,7 +207,7 @@ function Index({ setTab }) {
                           <div className="text-xl font-semibold text-left">{item.name}</div>
                           <div className="text-gray-400">{item.date}</div>
                         </div>
-                        <div className="text-xl text-green-700 font-semibold">{item.price}</div>
+                        <div className="text-xl text-green-700 font-semibold">{fomatMoney(item.price)}</div>
                       </div>
                     )
                   }else {
@@ -194,7 +217,7 @@ function Index({ setTab }) {
                           <div className="text-xl font-semibold text-left">{item.name}</div>
                           <div className="text-gray-400">{item.date}</div>
                         </div>
-                        <div className="text-xl text-red-700 font-semibold">{item.price}</div>
+                        <div className="text-xl text-red-700 font-semibold">{fomatMoney(item.price)}</div>
                       </div>
                     )
                   }
