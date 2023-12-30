@@ -38,16 +38,14 @@ function Plan({ setTab }) {
     let percent = (current / amount) * 100;
 
     let bg = '';
-    if (percent < 20) {
-      bg = 'bg-gradient-to-r from-green-500 to-green-300';
-    } else if (percent >= 20 && percent < 50) {
-      bg = 'bg-gradient-to-r from-green-300 to-yellow-500';
-    } else if (percent >= 50 && percent < 70) {
-      bg = 'bg-gradient-to-r from-yellow-500 to-orange-500';
-    } else if (percent >= 70 && percent < 90) {
-      bg = 'bg-gradient-to-r from-orange-500 to-red-300';
+    if (percent == 0) {
+      bg = 'bg-gray-500';
+    } else if (percent < 50) {
+      bg = 'bg-green-500';
+    } else if (percent >= 50 && percent < 80) {
+      bg = 'bg-yellow-500';
     } else {
-      bg = 'bg-gradient-to-r from-red-300 to-red-500';
+      bg = 'bg-red-500';
     }
 
     return {
@@ -181,7 +179,7 @@ function Plan({ setTab }) {
             })}
             <div className="w-full p-3 mt-5 border-[1px] border-gray-200 rounded-3xl text-2xl">
               <span>Gợi ý số tiền nên tiêu mỗi ngày để đạt mục tiêu cuối tháng: </span>
-              <span className="text-lime-500">{remainingAmount.toLocaleString('vi-VN')}VND</span>
+              <span className="text-black-500">{remainingAmount.toLocaleString('vi-VN')}VND</span>
             </div>
           </div>
 
