@@ -98,7 +98,7 @@ function Layout({ tab, setTab, children }) {
                 </div>
             </div>
 
-            <div className="w-full pl-[300px]">
+            <div className="w-full h-[100vh] overflow-auto pl-[300px]">
                 {children}
             </div>
         </div >
