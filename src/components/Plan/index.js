@@ -2,6 +2,7 @@ import { AiFillPlusSquare } from "react-icons/ai";
 import Layout from '../Layout'
 import React, { useState, useMemo } from 'react'
 import usePlan from "./usePlan";
+import { toast } from "react-toastify";
 
 function Plan({ setTab }) {
   const initFormValue = {
@@ -9,7 +10,7 @@ function Plan({ setTab }) {
     id: 0,
   }
 
-  const { categories, addPlanMutation } = usePlan();
+  const { allCategories, categories, addPlanMutation } = usePlan();
   const [formData, setFormData] = useState(initFormValue);
   const [error, setError] = useState(false);
 
@@ -21,15 +22,18 @@ function Plan({ setTab }) {
     });
   };
 
+
   const handleSubmit = () => {
     addPlanMutation
       .mutate(formData, {
         onSuccess: () => {
           setError(false);
           setFormData(initFormValue);
+          toast.success("Tạo thành công")
         },
         onError: () => {
           setError(true);
+          toast.success("Tạo không thành công")
         }
       })
   }
@@ -38,16 +42,14 @@ function Plan({ setTab }) {
     let percent = (current / amount) * 100;
 
     let bg = '';
-    if (percent < 20) {
-      bg = 'bg-gradient-to-r from-green-500 to-green-300';
-    } else if (percent >= 20 && percent < 50) {
-      bg = 'bg-gradient-to-r from-green-300 to-yellow-500';
-    } else if (percent >= 50 && percent < 70) {
-      bg = 'bg-gradient-to-r from-yellow-500 to-orange-500';
-    } else if (percent >= 70 && percent < 90) {
-      bg = 'bg-gradient-to-r from-orange-500 to-red-300';
+    if (percent == 0) {
+      bg = 'bg-gray-500';
+    } else if (percent < 50) {
+      bg = 'bg-green-500';
+    } else if (percent >= 50 && percent < 80) {
+      bg = 'bg-yellow-500';
     } else {
-      bg = 'bg-gradient-to-r from-red-300 to-red-500';
+      bg = 'bg-red-500';
     }
 
     return {
@@ -70,7 +72,10 @@ function Plan({ setTab }) {
     const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
     // Calculate the number of days left in the month
-    const daysLeftInMonth = Math.ceil((lastDayOfMonth - currentDate) / (1000 * 60 * 60 * 24));
+    let daysLeftInMonth = Math.ceil((lastDayOfMonth - currentDate) / (1000 * 60 * 60 * 24));
+
+    if (daysLeftInMonth === 0)
+      daysLeftInMonth = 1;
 
     // Calculate the total amount of the entire array
     const totalAmount = categories.reduce((acc, category) => acc + category.amount, 0);
@@ -83,6 +88,8 @@ function Plan({ setTab }) {
 
     return result;
   }, [categories])
+
+  console.log(remainingAmount);
 
   const handleDelete = (category) => {
     addPlanMutation
@@ -128,7 +135,7 @@ function Plan({ setTab }) {
                 className='p-2 border-[1px] min-w-full outline-none rounded-lg border-gray-200 bg-slate-100'
               >
                 <option value={0}>Chọn danh mục</option>
-                {categories?.map((item, index) => {
+                {allCategories?.map((item, index) => {
                   return (
                     <option key={index} value={item.id}>{item.name}</option>
                   )
@@ -181,7 +188,7 @@ function Plan({ setTab }) {
             })}
             <div className="w-full p-3 mt-5 border-[1px] border-gray-200 rounded-3xl text-2xl">
               <span>Gợi ý số tiền nên tiêu mỗi ngày để đạt mục tiêu cuối tháng: </span>
-              <span className="text-lime-500">{remainingAmount.toLocaleString('vi-VN')}VND</span>
+              <span className="text-black-500">{remainingAmount.toLocaleString('vi-VN')}VND</span>
             </div>
           </div>
 

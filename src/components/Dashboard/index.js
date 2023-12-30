@@ -28,8 +28,7 @@ function Index({ setTab }) {
   const { listIncomes: listSpending } = useSpending()
   const [newArr, setNewArr] = useState([])
   const [total, setTotal] = useState(0)
-  
-  console.log(listIncomes, listSpending);
+
   useEffect(() => {
     (async function () {
       setNewArr([...listIncomes, ...listSpending])
@@ -56,8 +55,6 @@ function Index({ setTab }) {
         // Cập nhật tổng giá trị cho tháng tương ứng
         months[month - 1].income += item.price;
       }
-
-      console.log(months);
 
       if (chartRef.current) {
         chartRef.current.destroy(); // Destroy existing chart if it exists
@@ -86,28 +83,28 @@ function Index({ setTab }) {
         },
       });
 
-         // Tính tổng giá trị của tất cả các tháng
-         const totalOfAllMonthsIncome = months.reduce((sum, month) => sum + month.income, 0);
-         const totalOfAllMonthsSpending = months.reduce((sum, month) => sum + month.count, 0);
-         setTotal(totalOfAllMonthsIncome - totalOfAllMonthsSpending)
-         const dataDoughnut = {
-           labels: ['Thu', 'Chi'],
-           datasets: [{
-             label: 'My First Dataset',
-             data: [totalOfAllMonthsIncome, totalOfAllMonthsSpending],
-             backgroundColor: ['green', 'red'],
-             hoverOffset: 4,
-           }],
-         };
+      // Tính tổng giá trị của tất cả các tháng
+      const totalOfAllMonthsIncome = months.reduce((sum, month) => sum + month.income, 0);
+      const totalOfAllMonthsSpending = months.reduce((sum, month) => sum + month.count, 0);
+      setTotal(totalOfAllMonthsIncome - totalOfAllMonthsSpending)
+      const dataDoughnut = {
+        labels: ['Thu', 'Chi'],
+        datasets: [{
+          label: 'My First Dataset',
+          data: [totalOfAllMonthsIncome, totalOfAllMonthsSpending],
+          backgroundColor: ['green', 'red'],
+          hoverOffset: 4,
+        }],
+      };
 
-         if (chartDoughnutRef.current) {
-           chartDoughnutRef.current.destroy(); // Destroy existing chart if it exists
-         }
-   
-         chartDoughnutRef.current = new Chart(document.getElementById('doughnut'), {
-           type: 'doughnut',
-           data: dataDoughnut,
-         });
+      if (chartDoughnutRef.current) {
+        chartDoughnutRef.current.destroy(); // Destroy existing chart if it exists
+      }
+
+      chartDoughnutRef.current = new Chart(document.getElementById('doughnut'), {
+        type: 'doughnut',
+        data: dataDoughnut,
+      });
 
     })();
   }, [listSpending, listIncomes]);
@@ -119,7 +116,6 @@ function Index({ setTab }) {
     let month = date.$M
     let allItem = [...listIncomes, ...listSpending]
     let arr = allItem.filter((item) => new Date(item.date).getMonth() == month)
-    console.log(arr);
     setNewArr(arr)
   }
   return (
@@ -178,7 +174,7 @@ function Index({ setTab }) {
                   const dateB = new Date(b.date);
                   return dateB - dateA;
                 }).map(item => {
-                  if(item.categoryMetadata.status == "incomes") {
+                  if (item.categoryMetadata.status == "incomes") {
                     return (
                       <div className="flex justify-between items-center">
                         <div className="text-left">
@@ -188,7 +184,7 @@ function Index({ setTab }) {
                         <div className="text-xl text-green-700 font-semibold">{formatMoney(item.price)}</div>
                       </div>
                     )
-                  }else {
+                  } else {
                     return (
                       <div className="flex justify-between items-center">
                         <div className="text-left">
@@ -200,7 +196,7 @@ function Index({ setTab }) {
                     )
                   }
                 })}
-                
+
 
               </div>
               {/* <div className="flex justify-between justify-between items-center">

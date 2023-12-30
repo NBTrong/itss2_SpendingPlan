@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import {
   QueryClient,
@@ -7,13 +7,15 @@ import {
 import {
   useRecoilState,
 } from 'recoil';
-import { v4 as uuidV4 } from 'uuid';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Income from './components/Income/Income.js'
 import Login from './components/Login'
 import Spending from './components/Spending/Spending.js'
 import Plan from './components/Plan'
 import Dashboard from './components/Dashboard'
+import Register from './components/Register/index.js';
 import userKeyAtom from './storage/userKeyAtom.js'
 
 import './App.css';
@@ -21,22 +23,25 @@ import './App.css';
 function App() {
   const queryClient = new QueryClient()
   const [tab, setTab] = useState("income")
-  const [, setUserKey] = useRecoilState(userKeyAtom)
+  const [userKey, setUserKey] = useRecoilState(userKeyAtom)
 
-  const initUserKey = () => {
+  const checkUserKey = useCallback(() => {
     let _userKey = localStorage.getItem("userKey");
 
-    if (!_userKey) {
-      _userKey = uuidV4();
-      localStorage.setItem('userKey', _userKey);
-    }
-
     setUserKey(_userKey);
-  };
+  }, [setUserKey]);
 
   useEffect(() => {
-    initUserKey();
-  }, [])
+    checkUserKey();
+  }, [checkUserKey])
+
+  useEffect(() => {
+    if (userKey) {
+      setTab("dashboard")
+    } else {
+      setTab("login")
+    }
+  }, [userKey])
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -46,8 +51,10 @@ function App() {
         {tab === 'spending' && <Spending setTab={setTab} />}
         {tab === 'plan' && <Plan setTab={setTab} />}
         {tab === 'login' && <Login setTab={setTab} />}
+        {tab === 'register' && <Register setTab={setTab} />}
       </div>
       <ReactQueryDevtools initialIsOpen={false} />
+      <ToastContainer />
     </QueryClientProvider>
 
   );

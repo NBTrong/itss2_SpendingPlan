@@ -53,6 +53,7 @@ export default function usePlan() {
     select: (data) =>
       listExpensesTransform(data.data.data),
     retry: 3,
+    staleTime: 5 * 1000
   });
 
   // --------------------------------------------- Get list category -------------------------------
@@ -60,13 +61,26 @@ export default function usePlan() {
     queryKey: ['category-spending'],
     queryFn: () => getCategories({
       status: 'expenses',
+      isPlan: true
+    }),
+    enabled: !!userKey && !!isSuccess,
+    select: (data) => listCategoryTransform(data.data.data, true),
+    retry: 3,
+    staleTime: 5 * 1000
+  });
+
+  const allCategoryQuery = useQuery({
+    queryKey: ['category-all'],
+    queryFn: () => getCategories({
+      status: 'expenses',
     }),
     enabled: !!userKey && !!isSuccess,
     select: (data) => listCategoryTransform(data.data.data),
     retry: 3,
+    staleTime: 5 * 1000
   });
 
-  const listCategoryTransform = useCallback((categories) => {
+  const listCategoryTransform = useCallback((categories, isPlan = false) => {
     const result = categories ? categories.map(category => {
       return {
         id: category.id,
@@ -74,21 +88,24 @@ export default function usePlan() {
         color: category.color,
         icon: category.icon,
         status: category.status,
-        amount: category.amount,
+        amount: category?.amount ? category?.amount : 0,
         current: 0,
         createdAt: category.created_at,
         updatedAt: category.updated_at,
       };
     }) : [];
 
-    data.forEach(item => {
-      const categoryIndex = result.findIndex(category => {
-        return item.category.id === category.id
+    if (isPlan) {
+      data.forEach(item => {
+        const categoryIndex = result.findIndex(category => {
+          return item.category.id === category.id
+        })
+        if (categoryIndex !== -1) {
+          result[categoryIndex].current += item.amount
+        }
       })
-      if (categoryIndex !== -1) {
-        result[categoryIndex].current += item.amount
-      }
-    })
+    }
+
 
     return result
   }, [data]);
@@ -122,6 +139,7 @@ export default function usePlan() {
     },
   });
   return {
+    allCategories: allCategoryQuery?.data || [],
     categories: categoryQuery?.data || [],
     addPlanMutation,
     deletePlanMutation,

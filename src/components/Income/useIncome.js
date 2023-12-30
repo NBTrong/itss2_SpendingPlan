@@ -72,6 +72,7 @@ export default function useIncome() {
       listIncomesTransform(data.data.data)
     ),
     retry: 3,
+    staleTime: 5 * 1000
   });
 
   // --------------------------------------------- Get list category -------------------------------
@@ -83,6 +84,7 @@ export default function useIncome() {
     enabled: !!userKey,
     select: (data) => listCategoryTransform(data.data.data),
     retry: 3,
+    staleTime: 5 * 1000
   });
 
   const listCategoryTransform = useCallback((data) => {

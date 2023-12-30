@@ -9,6 +9,7 @@ import React, { useState } from 'react'
 import { TiDelete } from "react-icons/ti";
 import useSpending from "./useSpending";
 import swal from "sweetalert";
+import { toast } from "react-toastify";
 
 function Income({ setTab }) {
     const initFormValue = {
@@ -76,9 +77,11 @@ function Income({ setTab }) {
                     onSuccess: () => {
                         setError(false);
                         setFormData(initFormValue);
+                        toast.success("Tạo chi tiêu thành công")
                     },
                     onError: () => {
                         setError(true);
+                        toast.error("Tạo chi tiêu không thành công")
                     }
                 })
         else {
@@ -86,9 +89,11 @@ function Income({ setTab }) {
                 onSuccess: () => {
                     setError(false);
                     setFormData(initFormValue);
+                    toast.success("Cập nhật chi tiêu thành công")
                 },
                 onError: () => {
                     setError(true);
+                    toast.error("Cập nhật chi tiêu không thành công")
                 }
             });
         }
