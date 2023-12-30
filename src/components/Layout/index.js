@@ -5,8 +5,14 @@ import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { RiSettings5Line } from "react-icons/ri";
 import { RiUserLine } from "react-icons/ri";
 import { TbTable } from "react-icons/tb";
+import userKeyAtom from '../../storage/userKeyAtom.js'
+import {
+    useRecoilState,
+} from 'recoil';
+import { toast } from "react-toastify";
 
-function index({ tab, setTab, children }) {
+function Layout({ tab, setTab, children }) {
+    const [, setUserKey] = useRecoilState(userKeyAtom)
     return (
         <div className='w-full'>
             <div className='w-[300px] h-[100vh] flex flex-col justify-between bg-cyan-950 absolute top-0 left-0 text-white p-5'>
@@ -84,10 +90,13 @@ function index({ tab, setTab, children }) {
                     </div>
                 </div>
                 <div className="py-4">
-                    <button onClick={() => setTab('login')} className="px-6 py-3 bg-cyan-900 rounded-lg">Đăng xuất</button>
+                    <button onClick={() => {
+                        setUserKey(null);
+                        localStorage.removeItem("userKey")
+                        toast.success("Đăng xuất thành công")
+                    }} className="px-6 py-3 bg-cyan-900 rounded-lg">Đăng xuất</button>
                 </div>
             </div>
-
 
             <div className="w-full pl-[300px]">
                 {children}
@@ -96,4 +105,4 @@ function index({ tab, setTab, children }) {
     )
 }
 
-export default index
+export default Layout

@@ -1,5 +1,19 @@
 import publicApi from "./config/publicApi.config";
 
+export const register = (data) =>
+  publicApi({
+    method: 'POST',
+    url: '/auth/register',
+    data,
+  });
+
+export const login = (data) =>
+  publicApi({
+    method: 'POST',
+    url: '/auth/login',
+    data,
+  });
+
 export const getIncomes = (data) =>
   publicApi({
     method: 'POST',
@@ -60,12 +74,18 @@ export const getCategories = (data) =>
   publicApi({
     method: 'POST',
     url: '/category',
-    data,
+    data: {
+      ...data,
+      user_key: localStorage.getItem('userKey')
+    },
   })
 
 export const addPlan = (data) =>
   publicApi({
     method: 'POST',
     url: '/category/update',
-    data,
+    data: {
+      ...data,
+      user_key: localStorage.getItem('userKey')
+    },
   });

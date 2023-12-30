@@ -8,6 +8,7 @@ import Layout from '../Layout'
 import React, { useEffect, useState } from 'react'
 import { TiDelete } from "react-icons/ti";
 import useIncome from "./useIncome";
+import { toast } from "react-toastify";
 import swal from "sweetalert";
 
 function Income({ setTab }) {
@@ -79,9 +80,11 @@ function Income({ setTab }) {
                     onSuccess: () => {
                         setError(false);
                         setFormData(initFormValue);
+                        toast.success("Tạo thu nhập thành công")
                     },
                     onError: () => {
                         setError(true);
+                        toast.error("Tạo thu nhập không thành công")
                     }
                 })
         else {
@@ -89,9 +92,11 @@ function Income({ setTab }) {
                 onSuccess: () => {
                     setError(false);
                     setFormData(initFormValue);
+                    toast.success("Cập nhật thu nhập thành công")
                 },
                 onError: () => {
                     setError(true);
+                    toast.error("Cập nhật thu nhập không thành công")
                 }
             });
         }

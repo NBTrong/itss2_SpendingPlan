@@ -2,6 +2,7 @@ import { AiFillPlusSquare } from "react-icons/ai";
 import Layout from '../Layout'
 import React, { useState, useMemo } from 'react'
 import usePlan from "./usePlan";
+import { toast } from "react-toastify";
 
 function Plan({ setTab }) {
   const initFormValue = {
@@ -9,7 +10,7 @@ function Plan({ setTab }) {
     id: 0,
   }
 
-  const { categories, addPlanMutation } = usePlan();
+  const { allCategories, categories, addPlanMutation } = usePlan();
   const [formData, setFormData] = useState(initFormValue);
   const [error, setError] = useState(false);
 
@@ -21,15 +22,18 @@ function Plan({ setTab }) {
     });
   };
 
+
   const handleSubmit = () => {
     addPlanMutation
       .mutate(formData, {
         onSuccess: () => {
           setError(false);
           setFormData(initFormValue);
+          toast.success("Tạo thành công")
         },
         onError: () => {
           setError(true);
+          toast.success("Tạo không thành công")
         }
       })
   }
@@ -70,7 +74,10 @@ function Plan({ setTab }) {
     const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
     // Calculate the number of days left in the month
-    const daysLeftInMonth = Math.ceil((lastDayOfMonth - currentDate) / (1000 * 60 * 60 * 24));
+    let daysLeftInMonth = Math.ceil((lastDayOfMonth - currentDate) / (1000 * 60 * 60 * 24));
+
+    if (daysLeftInMonth === 0)
+      daysLeftInMonth = 1;
 
     // Calculate the total amount of the entire array
     const totalAmount = categories.reduce((acc, category) => acc + category.amount, 0);
@@ -83,6 +90,8 @@ function Plan({ setTab }) {
 
     return result;
   }, [categories])
+
+  console.log(remainingAmount);
 
   const handleDelete = (category) => {
     addPlanMutation
@@ -128,7 +137,7 @@ function Plan({ setTab }) {
                 className='p-2 border-[1px] min-w-full outline-none rounded-lg border-gray-200 bg-slate-100'
               >
                 <option value={0}>Chọn danh mục</option>
-                {categories?.map((item, index) => {
+                {allCategories?.map((item, index) => {
                   return (
                     <option key={index} value={item.id}>{item.name}</option>
                   )

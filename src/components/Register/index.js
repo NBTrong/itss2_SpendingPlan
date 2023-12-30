@@ -1,17 +1,12 @@
 import React, { useState } from 'react'
-import { login } from '../../services/api'
-import userKeyAtom from '../../storage/userKeyAtom.js'
-import {
-    useRecoilState,
-} from 'recoil';
+import { register } from '../../services/api.js'
 import { toast } from 'react-toastify';
 
-function Login({ setTab }) {
-    const [, setUserKey] = useRecoilState(userKeyAtom)
-
+function Register({ setTab }) {
     const [formData, setFormData] = useState({
         email: "",
-        password: ""
+        password: "",
+        confirmPassword: ""
     })
 
     const handleOnChange = (e) => {
@@ -24,16 +19,15 @@ function Login({ setTab }) {
 
     const handleSubmit = async () => {
         try {
-            const result = await login(formData);
-            const userKey = result.data.data.user_key;
-            console.log(userKey);
-            toast.success("Đăng nhập thành công");
-            localStorage.setItem('userKey', userKey);
-            setTab("dashboard");
-            setUserKey(userKey);
+            await register({
+                email: formData.email,
+                password: formData.password
+            });
+            toast.success("Tạo user thành công");
+            setTab("login");
         } catch (err) {
             console.log(err)
-            toast.error("Email hoặc password không hợp lệ");
+            toast.error("Email đã tồn tại!!!");
         }
     }
 
@@ -62,14 +56,19 @@ function Login({ setTab }) {
                             onChange={handleOnChange}
                             type='password' placeholder='Mật khẩu gồm ít nhất 8 ký tự' className='p-2 border-[1px] min-w-full outline-none rounded-lg border-black bg-slate-100' />
                     </div>
-                    {/* <div className='text-sm text-right text-blue-500 w-full'>
-                        Quên mật khẩu
-                    </div> */}
+                    <div className='flex flex-col items-start pb-4'>
+                        <div>Xác minh mật khẩu</div>
+                        <input
+                            name='confirmPassword'
+                            value={formData.confirmPassword}
+                            onChange={handleOnChange}
+                            type='password' placeholder='Mật khẩu gồm ít nhất 8 ký tự' className='p-2 border-[1px] min-w-full outline-none rounded-lg border-black bg-slate-100' />
+                    </div>
                     <button className='py-3 w-full bg-black text-white mt-4 rounded-lg' onClick={handleSubmit}>
-                        Đăng nhập
+                        Đăng kí
                     </button>
                     <div className='text-sm text-center text-blue-500 w-full mt-4'>
-                        <span className='text-black'>Chưa có tài khoản?</span> <span className='font-semibold text-blue-500 cursor-pointer' onClick={() => setTab("register")}>Đăng ký</span>
+                        <span className='text-black'>Đã có tài khoản?</span> <span className='font-semibold text-blue-500 cursor-pointer' onClick={() => setTab("login")}>Đăng nhập</span>
                     </div>
                 </div>
             </div>
@@ -80,4 +79,4 @@ function Login({ setTab }) {
     )
 }
 
-export default Login;
+export default Register;
