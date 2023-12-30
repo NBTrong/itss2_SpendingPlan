@@ -86,7 +86,6 @@ function Index({ setTab }) {
         },
       });
 
-        //Biểu đồ theo thu chi
          // Tính tổng giá trị của tất cả các tháng
          const totalOfAllMonthsIncome = months.reduce((sum, month) => sum + month.income, 0);
          const totalOfAllMonthsSpending = months.reduce((sum, month) => sum + month.count, 0);
@@ -101,27 +100,6 @@ function Index({ setTab }) {
            }],
          };
 
-
-    /* //Biểu đồ theo Category
-         // Chuyển đổi đối tượng categoryPriceMap thành một mảng
-      const categoryPriceArray = [...Object.values(categoryIncome),...Object.values(categorySpending)];
-
-      console.log(categoryPriceArray);
-      // Tính tổng giá trị của tất cả các tháng
-      const totalOfAllMonthsIncome = months.reduce((sum, month) => sum + month.income, 0);
-      const totalOfAllMonthsSpending = months.reduce((sum, month) => sum + month.count, 0);
-      setTotal(totalOfAllMonthsIncome - totalOfAllMonthsSpending)
-      const dataDoughnut = {
-        labels: categoryPriceArray.map(item => item.category),
-        datasets: [{
-          label: 'My First Dataset',
-          data: categoryPriceArray.map(item => item.price),
-          backgroundColor: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange', 'Pink'],
-          hoverOffset: 4,
-        }],
-      };
-    */
-   
          if (chartDoughnutRef.current) {
            chartDoughnutRef.current.destroy(); // Destroy existing chart if it exists
          }
