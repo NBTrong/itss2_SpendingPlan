@@ -25,6 +25,7 @@ function Login({ setTab }) {
     const handleSubmit = async () => {
         try {
             const result = await login(formData);
+            localStorage.setItem('name',formData.email)
             const userKey = result.data.data.user_key;
             console.log(userKey);
             toast.success("Đăng nhập thành công");
