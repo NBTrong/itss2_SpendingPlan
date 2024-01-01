@@ -120,14 +120,25 @@ export default function usePlan() {
           ).getDate() - new Date().getDate();
         let amountDay = (item.amount - item.current) / numberOfDays;
         item.title =
-          "Mỗi ngày bạn sẽ cần tiêu " +
-          Math.round(amountDay) +
-          " để sử dụng hết số tiền";
+          amountDay > 0
+            ? "Mỗi ngày bạn sẽ cần tiêu " +
+              formatMoney(Math.round(amountDay)) +
+              " để sử dụng hết số tiền"
+            : "Bạn đã chi tiêu vượt quá " +
+              formatMoney(Math.abs(item.amount - item.current));
       });
       return result;
     },
     [data]
   );
+
+  const formatMoney = (amount) => {
+    const formattedAmount = new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+    return formattedAmount;
+  };
 
   // ---------------------------------------------- Add plan ------------------------------------
   const addPlanMutation = useMutation({
