@@ -147,7 +147,7 @@ function Index({ setTab }) {
     if (categories && allCategories) {
       updateChart(listIncomes, listSpending, 0);
       setIncome(listIncomes);
-      setSpending(listSpending);gi
+      setSpending(listSpending);
     }
   }, [listSpending, listIncomes]);
   const formatMoney = (amount) => {
