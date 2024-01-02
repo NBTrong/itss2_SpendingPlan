@@ -120,9 +120,9 @@ export default function usePlan() {
           ).getDate() - new Date().getDate();
         let amountDay = (item.amount - item.current) / numberOfDays;
         item.title =
-          "Mỗi ngày bạn sẽ cần tiêu " +
-          Math.round(amountDay) +
-          " để sử dụng hết số tiền";
+          "Mỗi ngày bạn nên tiêu " +
+          (Math.round(amountDay / 1000) * 1000).toLocaleString("vi-VN") +
+          "VND để đạt được mục tiêu đề ra";
       });
       return result;
     },

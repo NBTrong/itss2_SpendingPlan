@@ -25,8 +25,8 @@ function Register({ setTab }) {
             });
             toast.success("Tạo user thành công");
             setTab("login");
-        } catch (err) {
-            console.log(err)
+        } catch (error) {
+            console.log(error)
             toast.error("Email đã tồn tại!!!");
         }
     }

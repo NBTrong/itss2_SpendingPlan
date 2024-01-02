@@ -162,7 +162,13 @@ function Index({ setTab }) {
       datasets: [
         {
           data: data,
-          backgroundColor: ["green", "red", "yellow", "black"],
+          backgroundColor: [
+            "dodgerBlue",
+            "orange",
+            "tomato",
+            "MediumSeaGreen",
+            "violet",
+          ],
           hoverOffset: 4,
         },
       ],
@@ -180,15 +186,13 @@ function Index({ setTab }) {
   useEffect(() => {
     if (categories && allCategories) {
       // Set default bảng transaction là tháng năm hiện tại
-      if (newArr.length === 0) {
-        let allItem = [...listIncomes, ...listSpending];
-        let arr = allItem.filter(
-          (item) =>
-            new Date(item.date).getMonth() + 1 == currentMonth &&
-            new Date(item.date).getFullYear() === currentYear
-        );
-        setNewArr(arr);
-      }
+      let allItem = [...listIncomes, ...listSpending];
+      let arr = allItem.filter(
+        (item) =>
+          new Date(item.date).getMonth() + 1 == currentMonth &&
+          new Date(item.date).getFullYear() === currentYear
+      );
+      setNewArr(arr);
 
       // Set default 2 biểu đồ là tháng năm hiện tại
       updateChart(
@@ -210,8 +214,8 @@ function Index({ setTab }) {
     return formattedAmount;
   };
   const handleChange = (date) => {
-    let month = date.$M + 1;
-    let year = date.$y;
+    let month = Number(date.split("-")[1]);
+    let year = Number(date.split("-")[0]);
     let allItem = [...listIncomes, ...listSpending];
     let arr = allItem.filter(
       (item) =>
@@ -243,17 +247,22 @@ function Index({ setTab }) {
 
   return (
     <Layout tab={"dashboard"} setTab={setTab}>
-      <div className="text-center text-3xl font-bold mt-10">
-        Xin chào {name}
-      </div>
       <div className="w-full px-10">
         <div className="grid grid-cols-2 mt-5 gap-10">
           <div className="col-span-1 mb-3">
             <canvas id="acquisitions"></canvas>
           </div>
-          <div className="col-span-1 ml-5 mt-5">
-            {/* <Calendar onChange={onChange} value={value} /> */}
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <div className="col-span-1 ml-5 mt-5 flex justify-center items-center">
+            <input
+              type="month"
+              // className="border-[1px] border-gray-200 p-2 outline-none"
+              defaultValue={`${currentYear}-${
+                currentMonth < 10 ? `0${currentMonth}` : currentMonth
+              }`}
+              className="border-[1px] border-gray-200 p-2 outline-none"
+              onChange={(e) => handleChange(e.target.value)}
+            />
+            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["MonthCalendar"]}>
                 <DemoItem>
                   <DateCalendar
@@ -262,7 +271,7 @@ function Index({ setTab }) {
                   />
                 </DemoItem>
               </DemoContainer>
-            </LocalizationProvider>
+            </LocalizationProvider> */}
           </div>
           <div className="col-span-1 mb-3 border-[1px] rounded-lg border-black">
             <div className="pb-4 p-5">
@@ -272,7 +281,7 @@ function Index({ setTab }) {
                   <IoIosOpen />
                 </div>
               </div>
-              <div className="h-[30vh] overflow-y-auto">
+              <div className="h-[40vh] overflow-y-auto">
                 {/* {listSpending?.map(item => {
                   return (
                     <div className="flex justify-between justify-between items-center">
@@ -303,10 +312,13 @@ function Index({ setTab }) {
                     const dateB = new Date(b.date);
                     return dateB - dateA;
                   })
-                  .map((item) => {
+                  .map((item, index) => {
                     if (item.categoryMetadata.status == "incomes") {
                       return (
-                        <div className="flex justify-between items-center">
+                        <div
+                          className="flex justify-between items-center"
+                          key={index}
+                        >
                           <div className="text-left">
                             <div className="text-xl font-semibold text-left">
                               {item.name}
@@ -358,7 +370,21 @@ function Index({ setTab }) {
               </div> */}
             </div>
           </div>
-          <div className="col-span-1 ml-5">
+          <div className="col-span-1 ml-5 flex justify-center items-start">
+            <div className="flex flex-col justify-center items-center">
+              <div style={{ width: 300, height: 300, marginTop: -20 }}>
+                <canvas
+                  id="doughnut"
+                  style={{ width: 300, height: 300 }}
+                ></canvas>
+              </div>
+              <div className="w-[400px] p-3 mt-3 border-[1px] px-10 border-gray-200 rounded-3xl text-left">
+                <div className="text-gray-400">Tổng số tài sản hiện tại</div>
+                <div className="text-3xl font-semibold">
+                  {formatMoney(total)}
+                </div>
+              </div>
+            </div>
             <select
               onChange={(e) =>
                 changeValue(e.target.value, currentMonth, currentYear)
@@ -367,16 +393,6 @@ function Index({ setTab }) {
               <option value={0}>Thu</option>
               <option value={1}>Chi</option>
             </select>
-            <div style={{ width: 300, height: 300, marginTop: -20 }}>
-              <canvas
-                id="doughnut"
-                style={{ width: 300, height: 300 }}
-              ></canvas>
-            </div>
-            <div className="w-[400px] p-3 mt-3 border-[1px] px-10 border-gray-200 rounded-3xl text-left">
-              <div className="text-gray-400">Tổng số tài sản hiện tại</div>
-              <div className="text-3xl font-semibold">{formatMoney(total)}</div>
-            </div>
           </div>
         </div>
       </div>
