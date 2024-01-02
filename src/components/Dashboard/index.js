@@ -19,11 +19,13 @@ import { DateCalendar } from "@mui/x-date-pickers";
 import userKeyAtom from "../../storage/userKeyAtom";
 import { useRecoilState } from "recoil";
 import usePlan from "../Plan/usePlan";
+
 function Index({ setTab }) {
   const chartRef = useRef(null);
   const chartDoughnutRef = useRef(null);
-  const [value, setValue] = useState(new Date());
-  const [currentMonth, setCurrentMonth] = useState(null); // Thêm state cho tháng hiện tại
+  const [toggleValue, setToggleValue] = useState(0); // Thêm state cho toggle biểu đồ tròn
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1); // Thêm state cho tháng hiện tại
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear()); // Thêm state cho năm hiện tại
   const { listIncomes, categories } = useIncome();
   const { listIncomes: listSpending } = useSpending();
   const [newArr, setNewArr] = useState([]);
@@ -42,17 +44,41 @@ function Index({ setTab }) {
     checkUserKey();
   }, [checkUserKey]);
 
-  const updateChart = async (listIncomes, listSpending, chosen) => {
-    let months = Array.from({ length: 12 }, (_, index) => ({
+  const updateChart = async (
+    listIncomes,
+    listSpending,
+    chosen,
+    month,
+    year
+  ) => {
+    let dataSet = Array.from({ length: 12 }, (_, index) => ({
       month: index + 1,
+      year: new Date().getFullYear(),
       count: 0,
       income: 0,
     }));
+    // ----------------- PIE CHART -----------------
     let data = new Array(allCategories.length);
     let labels = new Array(allCategories.length);
+
+    let doughnutIncomes = listIncomes;
+    let doughnutSpending = listSpending;
+    if (month) {
+      doughnutIncomes = listIncomes.filter(
+        (item) =>
+          new Date(item.date).getMonth() + 1 == month &&
+          new Date(item.date).getFullYear() === year
+      );
+      doughnutSpending = listSpending.filter(
+        (item) =>
+          new Date(item.date).getMonth() + 1 == month &&
+          new Date(item.date).getFullYear() === year
+      );
+    }
+
     if (chosen === 1) {
       for (var i = 0; i < data.length; i++) {
-        data[i] = listSpending
+        data[i] = doughnutSpending
           .filter((n) => n.categoryId == allCategories[i].id)
           .reduce((sum, month) => sum + month.price, 0);
         labels[i] = allCategories[i].name;
@@ -61,28 +87,33 @@ function Index({ setTab }) {
       data = new Array(categories.length);
       labels = new Array(categories.length);
       for (var i = 0; i < data.length; i++) {
-        data[i] = listIncomes
+        data[i] = doughnutIncomes
           .filter((n) => n.categoryId == categories[i].id)
           .reduce((sum, month) => sum + month.price, 0);
         labels[i] = categories[i].name;
       }
     }
 
+    // ----------------- LINE GRAPH -----------------
     // Lặp qua từng đối tượng trong mảng dữ liệu
     for (const item of listSpending) {
       // Trích xuất tháng từ ngày trong đối tượng
       const month = new Date(item.date).getMonth() + 1;
+      const year = new Date(item.date).getFullYear();
 
       // Cập nhật tổng giá trị cho tháng tương ứng
-      months[month - 1].count += item.price;
+      dataSet[month - 1].count += item.price;
+      dataSet[month - 1].year = year;
     }
 
     for (const item of listIncomes) {
       // Trích xuất tháng từ ngày trong đối tượng
       const month = new Date(item.date).getMonth() + 1;
+      const year = new Date(item.date).getFullYear();
 
       // Cập nhật tổng giá trị cho tháng tương ứng
-      months[month - 1].income += item.price;
+      dataSet[month - 1].income += item.price;
+      dataSet[month - 1].year = year;
     }
 
     if (chartRef.current) {
@@ -92,18 +123,22 @@ function Index({ setTab }) {
     chartRef.current = new Chart(document.getElementById("acquisitions"), {
       type: "line",
       data: {
-        labels: months.map((row) => row.month),
+        labels: dataSet.map((row) => row.month),
         datasets: [
           {
             label: "Thu nhập",
-            data: months.map((row) => row.income),
+            data: dataSet.map((row) => {
+              return row.year === year ? row.income : 0;
+            }),
             fill: false, // To display an unfilled line
             borderColor: "green", // Line color
             tension: 0.1, // Line tension (0 for straight lines)
           },
           {
             label: "Chi tiêu",
-            data: months.map((row) => row.count),
+            data: dataSet.map((row) => {
+              return row.year === year ? row.count : 0;
+            }),
             fill: false, // To display an unfilled line
             borderColor: "red", // Line color
             tension: 0.1, // Line tension (0 for straight lines)
@@ -113,12 +148,12 @@ function Index({ setTab }) {
     });
 
     // Tính tổng giá trị của tất cả các tháng
-    const totalOfAllMonthsIncome = months.reduce(
-      (sum, month) => sum + month.income,
+    const totalOfAllMonthsIncome = dataSet.reduce(
+      (sum, row) => sum + row.income,
       0
     );
-    const totalOfAllMonthsSpending = months.reduce(
-      (sum, month) => sum + month.count,
+    const totalOfAllMonthsSpending = dataSet.reduce(
+      (sum, row) => sum + row.count,
       0
     );
     setTotal(totalOfAllMonthsIncome - totalOfAllMonthsSpending);
@@ -126,7 +161,6 @@ function Index({ setTab }) {
       labels: labels,
       datasets: [
         {
-          label: "My First Dataset",
           data: data,
           backgroundColor: ["green", "red", "yellow", "black"],
           hoverOffset: 4,
@@ -145,7 +179,25 @@ function Index({ setTab }) {
   };
   useEffect(() => {
     if (categories && allCategories) {
-      updateChart(listIncomes, listSpending, 0);
+      // Set default bảng transaction là tháng năm hiện tại
+      if (newArr.length === 0) {
+        let allItem = [...listIncomes, ...listSpending];
+        let arr = allItem.filter(
+          (item) =>
+            new Date(item.date).getMonth() + 1 == currentMonth &&
+            new Date(item.date).getFullYear() === currentYear
+        );
+        setNewArr(arr);
+      }
+
+      // Set default 2 biểu đồ là tháng năm hiện tại
+      updateChart(
+        listIncomes,
+        listSpending,
+        toggleValue,
+        currentMonth,
+        currentYear
+      );
       setIncome(listIncomes);
       setSpending(listSpending);
     }
@@ -158,32 +210,35 @@ function Index({ setTab }) {
     return formattedAmount;
   };
   const handleChange = (date) => {
-    let month = date.$M;
+    let month = date.$M + 1;
     let year = date.$y;
     let allItem = [...listIncomes, ...listSpending];
     let arr = allItem.filter(
       (item) =>
-        new Date(item.date).getMonth() == month &&
+        new Date(item.date).getMonth() + 1 == month &&
         new Date(item.date).getFullYear() === year
     );
     let incomes = listIncomes.filter(
       (item) =>
-        new Date(item.date).getMonth() == month &&
+        new Date(item.date).getMonth() + 1 == month &&
         new Date(item.date).getFullYear() === year
     );
-    let spendings = listSpending.filter(
+    let spending = listSpending.filter(
       (item) =>
-        new Date(item.date).getMonth() == month &&
+        new Date(item.date).getMonth() + 1 == month &&
         new Date(item.date).getFullYear() === year
     );
-    setIncome(incomes);
-    setSpending(spendings);
+    setIncome(listIncomes);
+    setSpending(listSpending);
     setNewArr(arr);
-    updateChart(incomes, spendings, 0);
+    setCurrentMonth(month);
+    setCurrentYear(year);
+    updateChart(listIncomes, listSpending, toggleValue, month, year);
   };
 
-  const changeValue = (e) => {
-    updateChart(income, spending, Number(e));
+  const changeValue = (e, month, year) => {
+    setToggleValue(Number(e));
+    updateChart(income, spending, Number(e), month, year);
   };
 
   return (
@@ -304,7 +359,11 @@ function Index({ setTab }) {
             </div>
           </div>
           <div className="col-span-1 ml-5">
-            <select onChange={(e) => changeValue(e.target.value)}>
+            <select
+              onChange={(e) =>
+                changeValue(e.target.value, currentMonth, currentYear)
+              }
+            >
               <option value={0}>Thu</option>
               <option value={1}>Chi</option>
             </select>
