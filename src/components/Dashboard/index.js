@@ -19,11 +19,13 @@ import { DateCalendar } from "@mui/x-date-pickers";
 import userKeyAtom from "../../storage/userKeyAtom";
 import { useRecoilState } from "recoil";
 import usePlan from "../Plan/usePlan";
+
 function Index({ setTab }) {
   const chartRef = useRef(null);
   const chartDoughnutRef = useRef(null);
-  const [value, setValue] = useState(new Date());
-  const [currentMonth, setCurrentMonth] = useState(null); // Thêm state cho tháng hiện tại
+  const [toggleValue, setToggleValue] = useState(0); // Thêm state cho toggle biểu đồ tròn
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1); // Thêm state cho tháng hiện tại
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear()); // Thêm state cho năm hiện tại
   const { listIncomes, categories } = useIncome();
   const { listIncomes: listSpending } = useSpending();
   const [newArr, setNewArr] = useState([]);
@@ -42,17 +44,41 @@ function Index({ setTab }) {
     checkUserKey();
   }, [checkUserKey]);
 
-  const updateChart = async (listIncomes, listSpending, chosen) => {
-    let months = Array.from({ length: 12 }, (_, index) => ({
+  const updateChart = async (
+    listIncomes,
+    listSpending,
+    chosen,
+    month,
+    year
+  ) => {
+    let dataSet = Array.from({ length: 12 }, (_, index) => ({
       month: index + 1,
+      year: new Date().getFullYear(),
       count: 0,
       income: 0,
     }));
+    // ----------------- PIE CHART -----------------
     let data = new Array(allCategories.length);
     let labels = new Array(allCategories.length);
+
+    let doughnutIncomes = listIncomes;
+    let doughnutSpending = listSpending;
+    if (month) {
+      doughnutIncomes = listIncomes.filter(
+        (item) =>
+          new Date(item.date).getMonth() + 1 == month &&
+          new Date(item.date).getFullYear() === year
+      );
+      doughnutSpending = listSpending.filter(
+        (item) =>
+          new Date(item.date).getMonth() + 1 == month &&
+          new Date(item.date).getFullYear() === year
+      );
+    }
+
     if (chosen === 1) {
       for (var i = 0; i < data.length; i++) {
-        data[i] = listSpending
+        data[i] = doughnutSpending
           .filter((n) => n.categoryId == allCategories[i].id)
           .reduce((sum, month) => sum + month.price, 0);
         labels[i] = allCategories[i].name;
@@ -61,28 +87,33 @@ function Index({ setTab }) {
       data = new Array(categories.length);
       labels = new Array(categories.length);
       for (var i = 0; i < data.length; i++) {
-        data[i] = listIncomes
+        data[i] = doughnutIncomes
           .filter((n) => n.categoryId == categories[i].id)
           .reduce((sum, month) => sum + month.price, 0);
         labels[i] = categories[i].name;
       }
     }
 
+    // ----------------- LINE GRAPH -----------------
     // Lặp qua từng đối tượng trong mảng dữ liệu
     for (const item of listSpending) {
       // Trích xuất tháng từ ngày trong đối tượng
       const month = new Date(item.date).getMonth() + 1;
+      const year = new Date(item.date).getFullYear();
 
       // Cập nhật tổng giá trị cho tháng tương ứng
-      months[month - 1].count += item.price;
+      dataSet[month - 1].count += item.price;
+      dataSet[month - 1].year = year;
     }
 
     for (const item of listIncomes) {
       // Trích xuất tháng từ ngày trong đối tượng
       const month = new Date(item.date).getMonth() + 1;
+      const year = new Date(item.date).getFullYear();
 
       // Cập nhật tổng giá trị cho tháng tương ứng
-      months[month - 1].income += item.price;
+      dataSet[month - 1].income += item.price;
+      dataSet[month - 1].year = year;
     }
 
     if (chartRef.current) {
@@ -92,18 +123,22 @@ function Index({ setTab }) {
     chartRef.current = new Chart(document.getElementById("acquisitions"), {
       type: "line",
       data: {
-        labels: months.map((row) => row.month),
+        labels: dataSet.map((row) => row.month),
         datasets: [
           {
             label: "Thu nhập",
-            data: months.map((row) => row.income),
+            data: dataSet.map((row) => {
+              return row.year === year ? row.income : 0;
+            }),
             fill: false, // To display an unfilled line
             borderColor: "green", // Line color
             tension: 0.1, // Line tension (0 for straight lines)
           },
           {
             label: "Chi tiêu",
-            data: months.map((row) => row.count),
+            data: dataSet.map((row) => {
+              return row.year === year ? row.count : 0;
+            }),
             fill: false, // To display an unfilled line
             borderColor: "red", // Line color
             tension: 0.1, // Line tension (0 for straight lines)
@@ -113,12 +148,12 @@ function Index({ setTab }) {
     });
 
     // Tính tổng giá trị của tất cả các tháng
-    const totalOfAllMonthsIncome = months.reduce(
-      (sum, month) => sum + month.income,
+    const totalOfAllMonthsIncome = dataSet.reduce(
+      (sum, row) => sum + row.income,
       0
     );
-    const totalOfAllMonthsSpending = months.reduce(
-      (sum, month) => sum + month.count,
+    const totalOfAllMonthsSpending = dataSet.reduce(
+      (sum, row) => sum + row.count,
       0
     );
     setTotal(totalOfAllMonthsIncome - totalOfAllMonthsSpending);
@@ -126,9 +161,14 @@ function Index({ setTab }) {
       labels: labels,
       datasets: [
         {
-          label: "My First Dataset",
           data: data,
-          backgroundColor: ["green", "red", "yellow", "black"],
+          backgroundColor: [
+            "dodgerBlue",
+            "orange",
+            "tomato",
+            "MediumSeaGreen",
+            "violet",
+          ],
           hoverOffset: 4,
         },
       ],
@@ -145,7 +185,23 @@ function Index({ setTab }) {
   };
   useEffect(() => {
     if (categories && allCategories) {
-      updateChart(listIncomes, listSpending, 0);
+      // Set default bảng transaction là tháng năm hiện tại
+      let allItem = [...listIncomes, ...listSpending];
+      let arr = allItem.filter(
+        (item) =>
+          new Date(item.date).getMonth() + 1 == currentMonth &&
+          new Date(item.date).getFullYear() === currentYear
+      );
+      setNewArr(arr);
+
+      // Set default 2 biểu đồ là tháng năm hiện tại
+      updateChart(
+        listIncomes,
+        listSpending,
+        toggleValue,
+        currentMonth,
+        currentYear
+      );
       setIncome(listIncomes);
       setSpending(listSpending);
     }
@@ -158,47 +214,55 @@ function Index({ setTab }) {
     return formattedAmount;
   };
   const handleChange = (date) => {
-    let month = date.$M;
-    let year = date.$y;
+    let month = Number(date.split("-")[1]);
+    let year = Number(date.split("-")[0]);
     let allItem = [...listIncomes, ...listSpending];
     let arr = allItem.filter(
       (item) =>
-        new Date(item.date).getMonth() == month &&
+        new Date(item.date).getMonth() + 1 == month &&
         new Date(item.date).getFullYear() === year
     );
     let incomes = listIncomes.filter(
       (item) =>
-        new Date(item.date).getMonth() == month &&
+        new Date(item.date).getMonth() + 1 == month &&
         new Date(item.date).getFullYear() === year
     );
-    let spendings = listSpending.filter(
+    let spending = listSpending.filter(
       (item) =>
-        new Date(item.date).getMonth() == month &&
+        new Date(item.date).getMonth() + 1 == month &&
         new Date(item.date).getFullYear() === year
     );
-    setIncome(incomes);
-    setSpending(spendings);
+    setIncome(listIncomes);
+    setSpending(listSpending);
     setNewArr(arr);
-    updateChart(incomes, spendings, 0);
+    setCurrentMonth(month);
+    setCurrentYear(year);
+    updateChart(listIncomes, listSpending, toggleValue, month, year);
   };
 
-  const changeValue = (e) => {
-    updateChart(income, spending, Number(e));
+  const changeValue = (e, month, year) => {
+    setToggleValue(Number(e));
+    updateChart(income, spending, Number(e), month, year);
   };
 
   return (
     <Layout tab={"dashboard"} setTab={setTab}>
-      <div className="text-center text-3xl font-bold mt-10">
-        Xin chào {name}
-      </div>
       <div className="w-full px-10">
         <div className="grid grid-cols-2 mt-5 gap-10">
           <div className="col-span-1 mb-3">
             <canvas id="acquisitions"></canvas>
           </div>
-          <div className="col-span-1 ml-5 mt-5">
-            {/* <Calendar onChange={onChange} value={value} /> */}
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <div className="col-span-1 ml-5 mt-5 flex justify-center items-center">
+            <input
+              type="month"
+              // className="border-[1px] border-gray-200 p-2 outline-none"
+              defaultValue={`${currentYear}-${
+                currentMonth < 10 ? `0${currentMonth}` : currentMonth
+              }`}
+              className="border-[1px] border-gray-200 p-2 outline-none"
+              onChange={(e) => handleChange(e.target.value)}
+            />
+            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DemoContainer components={["MonthCalendar"]}>
                 <DemoItem>
                   <DateCalendar
@@ -207,7 +271,7 @@ function Index({ setTab }) {
                   />
                 </DemoItem>
               </DemoContainer>
-            </LocalizationProvider>
+            </LocalizationProvider> */}
           </div>
           <div className="col-span-1 mb-3 border-[1px] rounded-lg border-black">
             <div className="pb-4 p-5">
@@ -217,7 +281,7 @@ function Index({ setTab }) {
                   <IoIosOpen />
                 </div>
               </div>
-              <div className="h-[30vh] overflow-y-auto">
+              <div className="h-[40vh] overflow-y-auto">
                 {/* {listSpending?.map(item => {
                   return (
                     <div className="flex justify-between justify-between items-center">
@@ -248,10 +312,13 @@ function Index({ setTab }) {
                     const dateB = new Date(b.date);
                     return dateB - dateA;
                   })
-                  .map((item) => {
+                  .map((item, index) => {
                     if (item.categoryMetadata.status == "incomes") {
                       return (
-                        <div className="flex justify-between items-center">
+                        <div
+                          className="flex justify-between items-center"
+                          key={index}
+                        >
                           <div className="text-left">
                             <div className="text-xl font-semibold text-left">
                               {item.name}
@@ -303,21 +370,29 @@ function Index({ setTab }) {
               </div> */}
             </div>
           </div>
-          <div className="col-span-1 ml-5">
-            <select onChange={(e) => changeValue(e.target.value)}>
+          <div className="col-span-1 ml-5 flex justify-center items-start">
+            <div className="flex flex-col justify-center items-center">
+              <div style={{ width: 300, height: 300, marginTop: -20 }}>
+                <canvas
+                  id="doughnut"
+                  style={{ width: 300, height: 300 }}
+                ></canvas>
+              </div>
+              <div className="w-[400px] p-3 mt-3 border-[1px] px-10 border-gray-200 rounded-3xl text-left">
+                <div className="text-gray-400">Tổng số tài sản hiện tại</div>
+                <div className="text-3xl font-semibold">
+                  {formatMoney(total)}
+                </div>
+              </div>
+            </div>
+            <select
+              onChange={(e) =>
+                changeValue(e.target.value, currentMonth, currentYear)
+              }
+            >
               <option value={0}>Thu</option>
               <option value={1}>Chi</option>
             </select>
-            <div style={{ width: 300, height: 300, marginTop: -20 }}>
-              <canvas
-                id="doughnut"
-                style={{ width: 300, height: 300 }}
-              ></canvas>
-            </div>
-            <div className="w-[400px] p-3 mt-3 border-[1px] px-10 border-gray-200 rounded-3xl text-left">
-              <div className="text-gray-400">Tổng số tài sản hiện tại</div>
-              <div className="text-3xl font-semibold">{formatMoney(total)}</div>
-            </div>
           </div>
         </div>
       </div>

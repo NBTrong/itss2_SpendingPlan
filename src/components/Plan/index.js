@@ -100,8 +100,6 @@ function Plan({ setTab }) {
     return result;
   }, [categories]);
 
-  console.log(remainingAmount);
-
   const handleDelete = (category) => {
     addPlanMutation.mutate(
       {
@@ -177,10 +175,10 @@ function Plan({ setTab }) {
             {categories.length > 0 &&
               categories
                 .filter((item) => item.amount > 0)
-                .map((category) => {
+                .map((category, index) => {
                   const remaining = category.amount - category.current;
                   return (
-                    <div className="w-full p-3  justify-start">
+                    <div className="w-full p-3  justify-start" key={index}>
                       <div className="text-xl px-3 flex justify-between mb-3">
                         <div className="text-left">{category.name}</div>
                         <div>{category.amount.toLocaleString("vi-VN")} VND</div>
@@ -201,6 +199,9 @@ function Plan({ setTab }) {
                                   ? handleProgress(category).percent
                                   : 10
                               }%`,
+                              opacity: `${
+                                handleProgress(category).percent === 0 ? 0 : 1
+                              }`,
                               height: 20,
                             }}
                           >
@@ -217,7 +218,10 @@ function Plan({ setTab }) {
                       <div className="flex items-center justify-between mt-1 text-center">
                         <div className="text-left text-slate-600 italic">
                           {remaining >= 0 ? "Còn" : "Vượt"}{" "}
-                          {Math.abs(remaining).toLocaleString("vi-VN")}VND
+                          {(
+                            Math.round(Math.abs(remaining) / 1000) * 1000
+                          ).toLocaleString("vi-VN")}
+                          VND
                         </div>
                         <div>
                           <span
@@ -242,8 +246,11 @@ function Plan({ setTab }) {
               <span>
                 Gợi ý số tiền nên tiêu mỗi ngày để đạt mục tiêu cuối tháng:{" "}
               </span>
-              <span  className="text-green-00 font-bold">
-                {remainingAmount.toLocaleString("vi-VN")}VND
+              <span className="text-emerald-500 font-bold">
+                {(Math.round(remainingAmount / 1000) * 1000).toLocaleString(
+                  "vi-VN"
+                )}
+                VND
               </span>
             </div>
           </div>

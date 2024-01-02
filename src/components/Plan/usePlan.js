@@ -121,11 +121,13 @@ export default function usePlan() {
         let amountDay = (item.amount - item.current) / numberOfDays;
         item.title =
           amountDay > 0
-            ? "Mỗi ngày bạn sẽ cần tiêu " +
-              formatMoney(Math.round(amountDay)) +
-              " để sử dụng hết số tiền"
+            ? "Mỗi ngày bạn nên tiêu " +
+              (Math.round(amountDay / 1000) * 1000).toLocaleString("vi-VN") +
+              "VND để đạt được mục tiêu đề ra"
             : "Bạn đã chi tiêu vượt quá " +
-              formatMoney(Math.abs(item.amount - item.current));
+              (
+                Math.round(Math.abs(item.amount - item.current) / 1000) * 1000
+              ).toLocaleString("vi-VN");
       });
       return result;
     },
