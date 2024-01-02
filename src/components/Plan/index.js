@@ -242,7 +242,7 @@ function Plan({ setTab }) {
               <span>
                 Gợi ý số tiền nên tiêu mỗi ngày để đạt mục tiêu cuối tháng:{" "}
               </span>
-              <span className="text-black-500">
+              <span  className="text-green-00 font-bold">
                 {remainingAmount.toLocaleString("vi-VN")}VND
               </span>
             </div>
