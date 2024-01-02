@@ -25,7 +25,7 @@ function Layout({ tab, setTab, children }) {
               />
             </div>
             <div className="text-left px-3 py-1 flex flex-col">
-              <span className="font-bold">{userName.split("@")[0]}</span>
+              <span className="font-bold">{userName?.split("@")[0]}</span>
               <span className="text-sm text-gray-500">{userName}</span>
             </div>
           </div>
