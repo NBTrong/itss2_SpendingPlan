@@ -134,6 +134,14 @@ export default function usePlan() {
     [data]
   );
 
+  const formatMoney = (amount) => {
+    const formattedAmount = new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+    return formattedAmount;
+  };
+
   // ---------------------------------------------- Add plan ------------------------------------
   const addPlanMutation = useMutation({
     mutationFn: (data) => {
